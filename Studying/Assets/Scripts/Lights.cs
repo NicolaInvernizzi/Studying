@@ -16,4 +16,8 @@ public class Lights : BaseEvent
     {
         _light.intensity += 5 * EventManager.eventSign;
     }
+    public void TurnOnOff(bool b)
+    {
+        gameObject.SetActive(b);
+    }
 }
