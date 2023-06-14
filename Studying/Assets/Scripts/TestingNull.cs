@@ -46,9 +46,9 @@ public class TestingNull : MonoBehaviour
         Debug.Log(gameObjec11);
         Debug.Log("gameObjec22:");
         Debug.Log(gameObjec22);
-        Debug.Log($"list11: {list11}");
+        Debug.Log($"list11:");
         Debug.Log(list11);
-        Debug.Log($"list22: {list22}");
+        Debug.Log($"list22:");
         Debug.Log(list22);
         testCounter++;
     }
