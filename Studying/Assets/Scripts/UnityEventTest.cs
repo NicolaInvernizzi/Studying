@@ -6,10 +6,8 @@ public class UnityEventTest : MonoBehaviour
 {
     UnityEvent unityEvent11;
     public UnityEvent unityEvent22;
-
-    GameObject gameObjec11;
-    public GameObject gameObjec22;
-    public List<GameObject> list;
+    public GameObject gameObjec22;       
+    public List<GameObject> list22;
 
     public event Delegate Event;
     public int test_int;
@@ -19,21 +17,6 @@ public class UnityEventTest : MonoBehaviour
 
     private void Update()
     {
-        if (unityEvent11 == null)
-            print("unityEvent11 is null");
-        if (unityEvent22== null)
-            print("unityEvent22 is null");
-        if (gameObjec22 == null)
-            print("gameObjec22 is null");
-        if (gameObjec11 == null)
-            print("gameObjec11 is null");
-        if (list == null)
-            print("list is null");
-
-
-        if (Input.GetKeyDown(KeyCode.Space))
-            list = null;
-
         if (Input.GetKeyDown(KeyCode.K))
             Dynamic_Invoke(test_int, test_bool);
 

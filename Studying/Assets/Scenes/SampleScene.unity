@@ -1163,6 +1163,7 @@ GameObject:
   - component: {fileID: 1079792865}
   - component: {fileID: 1079792864}
   - component: {fileID: 1079792866}
+  - component: {fileID: 1079792867}
   m_Layer: 0
   m_Name: GAME_MANAGER
   m_TagString: Untagged
@@ -1219,7 +1220,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   gameObjec22: {fileID: 0}
-  list: []
+  list22: []
   test_int: 0
   test_bool: 0
   dynamicTest:
@@ -1228,6 +1229,23 @@ MonoBehaviour:
   dynamicTest2:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1079792867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1079792863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 558519402c99f574fb8762963dc3ff5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unityEvent22:
+    m_PersistentCalls:
+      m_Calls: []
+  gameObjec22: {fileID: 0}
+  list22: []
 --- !u!1 &1311999642
 GameObject:
   m_ObjectHideFlags: 0
