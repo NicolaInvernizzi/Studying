@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 public class TestingNull : MonoBehaviour
 {
-    UnityEvent unityEvent11;
+    [SerializeField] UnityEvent unityEvent11;
     public UnityEvent unityEvent22;
 
     GameObject gameObjec11;
@@ -15,10 +15,7 @@ public class TestingNull : MonoBehaviour
 
     int testCounter = 0;
 
-    void Start()
-    {
-        Infos();
-    }
+    void Start() => Infos();
 
     void Update()
     {
@@ -37,19 +34,10 @@ public class TestingNull : MonoBehaviour
 
     void Infos()
     {
-        print($"----- Test {testCounter} -----");
-        Debug.Log("unityEvent11:");
-        Debug.Log(unityEvent11);
-        Debug.Log("unityEvent22:");
-        Debug.Log(unityEvent22);
-        Debug.Log("gameObjec11:");
-        Debug.Log(gameObjec11);
-        Debug.Log("gameObjec22:");
-        Debug.Log(gameObjec22);
-        Debug.Log($"list11:");
-        Debug.Log(list11);
-        Debug.Log($"list22:");
-        Debug.Log(list22);
+        print($"----- Test {testCounter} -----\n" +
+            $"\nunityEvent11: - {unityEvent11} -\nunityEvent22: - {unityEvent22} -" +
+            $"\ngameObjec11: - {gameObjec11} -\ngameObjec22: - {gameObjec22} -" +
+            $"\nlist11: - {list11} -\nlist22: - {list22} -");
         testCounter++;
     }
 }
