@@ -1,58 +1,108 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TestingDoubleCollision : MonoBehaviour
 {
-    public float moveIntensity = 2f;
-    public float radius = 2f;
-    public float maxTime = 2f;
-    public float knockbackIntenstiy = 2f;
+    // to add: 1. Animation curve for knockback. 2. Lerp for resetting movement from end knockback.
+    [SerializeField] float moveIntensity = 2f;
+    [SerializeField] float rotationIntensity = 2f;
+    [SerializeField] float sphereRadius = 2f;
+    [SerializeField] float knockbackTime = 2f;
+    [SerializeField] float knockbackIntenstiy = 2f;
+    [SerializeField] bool pauseInCollision = false;
     Collider[] colliders;
-    Vector3 moveDirection;
     Coroutine coroutine;
+    Vector3 startingPosition;
+    Quaternion startingRotation;
+    Vector3 startPosition_K;
+    Vector3 endPosition_K;
+    Color color_K;
+    private void Awake()
+    {
+        startingPosition = transform.position;
+        startingRotation = transform.rotation;
+    }
     void Update()
     {
-        colliders = Physics.OverlapSphere(transform.position, radius, LayerMask.GetMask("Obstacles"));
-
-        if (coroutine == null)
-            MovePlayer();
+        colliders = Physics.OverlapSphere(transform.position, sphereRadius, LayerMask.GetMask("Obstacles"));
+        Rotate();
+        if (coroutine == null && !Input.GetKey(KeyCode.Space))
+            transform.position += transform.forward * moveIntensity * Time.deltaTime;
 
         if (colliders.Length > 0)
         {
+            if (pauseInCollision)
+                Debug.Break();
+
             if (coroutine != null)
             {
                 StopCoroutine(coroutine);
                 coroutine = null;
             }
-            StartCoroutine(Knockback(transform.position, colliders[0].ClosestPoint(transform.position)));
+            coroutine = StartCoroutine(Knockback(transform.position, colliders[0]));
         }
     }
-    IEnumerator Knockback(Vector3 startPos, Vector3 collisionPoint)
+    IEnumerator Knockback(Vector3 startPos, Collider knockbackCollider)
     {
-        Vector3 endPos = transform.position + (transform.position - collisionPoint).normalized * knockbackIntenstiy;
-        endPos.y = 1f;
+        GetKnockbackColor(knockbackCollider);
+        startPosition_K = startPos;
+        Vector3 collisionPoint = knockbackCollider.ClosestPoint(transform.position);
+        endPosition_K = transform.position + (transform.position - collisionPoint).normalized * knockbackIntenstiy;
+        endPosition_K.y = 1f;
+
         float timer = 0f;
         float percentage; 
         while (true)
         {
             timer += Time.deltaTime;
-            percentage = timer / maxTime;
-            transform.position = Vector3.Lerp(startPos, endPos, percentage);
-            if (transform.position == endPos)
+            percentage = timer / knockbackTime;
+            transform.position = Vector3.Lerp(startPos, endPosition_K, percentage);
+            if (transform.position == endPosition_K)
                 break;
             yield return null;
         }
         coroutine = null;
     }
-    void MovePlayer()
+    void GetKnockbackColor(Collider knockbackCollider)
     {
-        moveDirection.x = -Input.GetAxis("Horizontal");
-        moveDirection.z = -Input.GetAxis("Vertical");
-        transform.position += moveDirection.normalized * moveIntensity * Time.deltaTime;
+        KnockBackColor knockbackColor = knockbackCollider.GetComponent<KnockBackColor>();
+        if (knockbackColor == null)
+        {
+            Debug.LogWarning("The obstacle hasn't knockback color");
+            color_K = Color.black;
+        }
+        else
+            color_K = knockbackColor.GetColor();
+    }
+    void Rotate()
+    {
+        if (Input.GetKey(KeyCode.D))
+            transform.Rotate(Vector3.up * rotationIntensity * 10 * Time.deltaTime);
+        if (Input.GetKey(KeyCode.A))
+            transform.Rotate(Vector3.up * (- rotationIntensity) * 10 * Time.deltaTime);
+    }
+    void ResetTransform()
+    {
+        transform.position = startingPosition;
+        transform.rotation = startingRotation;
+    }
+    void DrawKnockback()
+    {
+        if (coroutine != null)
+        {
+            Gizmos.color = color_K;
+            Gizmos.DrawWireSphere(endPosition_K, sphereRadius);
+            Gizmos.DrawLine(startPosition_K, endPosition_K);
+        }           
     }
     void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(transform.position, radius);
+        Gizmos.DrawWireSphere(transform.position, sphereRadius);
+        DrawKnockback();
+    }
+    void OnGUI()
+    {
+        if (GUILayout.Button("Reset player transform"))
+            ResetTransform();
     }
 }
