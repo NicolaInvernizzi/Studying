@@ -2,10 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Test1 : MonoBehaviour
+public class Line : MonoBehaviour
 {
-    void Update()
-    {
-        
-    }
+    public Vector3 p0, p1;
 }
