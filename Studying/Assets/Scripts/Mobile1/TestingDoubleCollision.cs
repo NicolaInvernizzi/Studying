@@ -17,6 +17,7 @@ public class TestingDoubleCollision : MonoBehaviour
     Vector3 startPosition_K;
     Vector3 endPosition_K;
     Color color_K;
+    Color sphereColor;
     private void Awake()
     {
         startingPosition = transform.position;
@@ -31,16 +32,17 @@ public class TestingDoubleCollision : MonoBehaviour
 
         if (colliders.Length > 0)
         {
+            sphereColor = Color.red;
             if (pauseInCollision)
                 Debug.Break();
 
             if (coroutine != null)
-            {
-                StopCoroutine(coroutine);
-                coroutine = null;
-            }
+                DestroyCoroutine(coroutine);
+
             coroutine = StartCoroutine(Knockback(transform.position, colliders[0]));
         }
+        else
+            sphereColor = Color.white;
     }
     IEnumerator Knockback(Vector3 startPos, Collider knockbackCollider)
     {
@@ -83,6 +85,7 @@ public class TestingDoubleCollision : MonoBehaviour
     }
     void ResetTransform()
     {
+        DestroyCoroutine(coroutine);
         transform.position = startingPosition;
         transform.rotation = startingRotation;
     }
@@ -95,8 +98,14 @@ public class TestingDoubleCollision : MonoBehaviour
             Gizmos.DrawLine(startPosition_K, endPosition_K);
         }           
     }
+    void DestroyCoroutine(Coroutine coroutine)
+    {
+        StopCoroutine(coroutine);
+        coroutine = null;
+    }
     void OnDrawGizmos()
     {
+        Gizmos.color = sphereColor;
         Gizmos.DrawWireSphere(transform.position, sphereRadius);
         DrawKnockback();
     }
