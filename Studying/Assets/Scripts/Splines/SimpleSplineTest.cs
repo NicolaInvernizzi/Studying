@@ -80,6 +80,6 @@ public class SimpleSplineTest : MonoBehaviour
             Gizmos.DrawLine(val12, val23);
         }
 
-        return Vector3.Lerp(Vector3.Lerp(val1, val2, t), Vector3.Lerp(val2, val3, t), t);
+        return Vector3.Lerp(val12, val23, t);
     }
 }

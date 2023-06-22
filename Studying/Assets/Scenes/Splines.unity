@@ -382,13 +382,13 @@ MonoBehaviour:
   - {fileID: 974226614}
   - {fileID: 2126729865}
   - {fileID: 1193479170}
-  steps: 3
+  steps: 23
   red: 0
   yellow: 0
   gray: 0
-  cyan: 1
-  orange: 1
-  blue: 1
+  cyan: 0
+  orange: 0
+  blue: 0
   curve: 1
 --- !u!4 &1538364160
 Transform:
