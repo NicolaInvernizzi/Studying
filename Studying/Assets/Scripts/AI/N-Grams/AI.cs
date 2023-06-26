@@ -112,4 +112,5 @@ public class AI : Player
         else
             move = GameManager.instance.RandomMove();
     }
+    public sealed override AI CheckAI() => this;
 }

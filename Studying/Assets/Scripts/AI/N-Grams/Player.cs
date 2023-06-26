@@ -15,12 +15,7 @@ public class Player : MonoBehaviour
         moveText = transform.Find("Organizer").Find("Move").GetComponentInChildren<Text>();
     } 
     void Start() => transform.Find("Organizer").Find("Name").GetComponentInChildren<Text>().text = playerName;
-    public AI CheckAI()
-    {
-        if (this is AI)
-            return this as AI;
-        return null;
-    }
+    public virtual AI CheckAI() => null;
     public void IncreaseScore()
     {
         score++;
