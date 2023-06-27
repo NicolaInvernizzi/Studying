@@ -1,53 +1,66 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
+using System;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance { get; private set; }
-    public string[] possibleMoves = new string[3] { "R", "S", "P" };
-    public Player playerLeft;
-    public Player playerRight;
-    Text matchInfo;
-    public bool waitingForMoves = true;
+    public float simulationTime = 1f;
+    public Player[] players;
+    public Text matchInfo;
     Coroutine coroutine;
 
-    private void Awake()
+    void Start() => StartGame();
+    void Update()
     {
-        instance = this;
-        transform.Find("MatchInfo").GetComponent<Text>();
-    }
-    private void Update()
-    {
-        if (coroutine == null && (playerLeft.move != "" && playerRight.move != ""))
-            coroutine = StartCoroutine(Game(playerLeft.move, playerRight.move));
-    }
-    public string RandomMove()
-    {
-        return possibleMoves[UnityEngine.Random.Range(0, possibleMoves.Length)];
+        if (coroutine == null && (players.All(p => p.move != "")))
+            coroutine = StartCoroutine(Game(players[0].move, players[1].move));
     }
     IEnumerator Game(string leftMove, string rightMove)
     {
-        waitingForMoves = false;
+        matchInfo.text = "Showing move...";
+        yield return new WaitForSeconds(simulationTime);
+        Array.ForEach(players, p => p.ShowMove());
+        yield return new WaitForSeconds(simulationTime);
 
         matchInfo.text = "Deciding winner...";
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(simulationTime);
         Score(leftMove, rightMove);
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(simulationTime);
+
         matchInfo.text = "Resetting...";
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(simulationTime);
+
+        for (int i = 0; i < players.Length; i++)
+        {
+            players[i].SetMove("");
+            players[i].ShowMove();
+        }
+        yield return new WaitForSeconds(simulationTime);
+
+        matchInfo.text = "Updating AI datas...";
+        yield return new WaitForSeconds(simulationTime);
+
+        for(int i = 0; i < players.Length; i++)
+            players[i].CheckAI()?.AIManagement(players[players.Length - (1 + i)].move);
+        yield return new WaitForSeconds(simulationTime);
+
+        matchInfo.text = "New match...";
+        yield return new WaitForSeconds(simulationTime);
+        StartGame();
+        coroutine = null;
+    }
+    void StartGame()
+    {
         matchInfo.text = "Waiting for moves...";
-
-        waitingForMoves = true;
-
-        playerLeft.CheckAI()?.RefreshData(rightMove);
-        playerRight.CheckAI()?.RefreshData(leftMove);
+        Array.ForEach(players, p => p.Play());
     }
     void Score(string leftMove, string rightMove)
     {
         string text1;
-        string text2 = "wins";
-        if (leftMove == playerRight.move)
+        string text2 = " wins";
+        if (leftMove == rightMove)
         {
             text1 = "Draw";
             text2 = "";
@@ -56,13 +69,13 @@ public class GameManager : MonoBehaviour
         (rightMove == "S" && leftMove == "P") ||
             (rightMove == "P" && leftMove == "R"))
         {
-            text1 = playerRight.name;
-            playerRight.IncreaseScore();
+            text1 = players[1].playerName;
+            players[1].IncreaseScore();
         }
         else
         {
-            text1 = playerLeft.name;
-            playerLeft.IncreaseScore();
+            text1 = players[0].playerName;
+            players[0].IncreaseScore();
         }
         matchInfo.text = text1 + text2;
     }

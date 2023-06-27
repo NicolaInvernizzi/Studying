@@ -1,51 +1,22 @@
 using UnityEngine.UI;
+using System.Linq;
+using System;
+using UnityEngine;
 
 public class Human : Player
 {
-    Button rockButton;
-    Button paperButton;
-    Button scissorButton;
-    protected sealed override void Awake()
+    [Space(10), Header("Human settings")]
+    public Button[] buttons;
+    public override void Play()
     {
-        base.Awake();
-        rockButton = transform.Find("Organizer").Find("Rock").GetComponent<Button>();
-        scissorButton = transform.Find("Organizer").Find("Scissor").GetComponent<Button>();
-        paperButton = transform.Find("Organizer").Find("Paper").GetComponent<Button>();
+        base.Play();
+        buttons.All(i => i.interactable = true);
     }
-    void Update()
+    public void Button(string move)
     {
-        if (GameManager.instance.waitingForMoves)
-        {
-            if (isPlaying && move != "")
-                CanPlay(false);
-        }
-        else
-        {
-            move = "";
-            CanPlay(true);
-        }
+        base.SetMove(move);
+        Array.ForEach(buttons, b => b.interactable = false);
+        moveText.text = "Decided";
     }
-    public void CanPlay(bool value)
-    {
-        rockButton.interactable = value;
-        paperButton.interactable = value;
-        scissorButton.interactable = value;
-        isPlaying = value;
-    }
-    bool isPlaying = true;
-    public void Rock()
-    {
-        move = GameManager.instance.possibleMoves[0];
-        moveText.text = move;
-    }
-    public void Scissor()
-    {
-        move = GameManager.instance.possibleMoves[1];
-        moveText.text = move;
-    }
-    public void Paper()
-    {
-        move = GameManager.instance.possibleMoves[2];
-        moveText.text = move;
-    } 
+    public sealed override Human CheckHuman() => this;
 }

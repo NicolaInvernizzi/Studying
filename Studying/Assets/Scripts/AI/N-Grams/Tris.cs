@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System;
-using Newtonsoft.Json.Linq;
 
 public class Tris : MonoBehaviour
 {

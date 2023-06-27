@@ -1,24 +1,23 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public abstract class Player : MonoBehaviour
 {
-    public string playerName = "";
-    public string move { get; protected set; } = "";
-    Text scoreText;
-    protected Text moveText;
+    [Header("Player settings")]
+    public string playerName;
+    public string move { get; private set; } = "";
+    public Text moveText, nameText, scoreText;
     int score = 0;
 
-    protected virtual void Awake()
-    {
-        scoreText = transform.Find("Score").GetComponentInChildren<Text>();
-        moveText = transform.Find("Organizer").Find("Move").GetComponentInChildren<Text>();
-    } 
-    void Start() => transform.Find("Organizer").Find("Name").GetComponentInChildren<Text>().text = playerName;
-    public virtual AI CheckAI() => null;
+    protected virtual void Awake() => nameText.text = playerName;
     public void IncreaseScore()
     {
         score++;
         scoreText.text = score.ToString();
     }
+    public void SetMove(string move) => this.move = move;
+    public void ShowMove() => moveText.text = move;
+    public virtual AI CheckAI() => null;
+    public virtual Human CheckHuman() => null;
+    public virtual void Play() => moveText.text = "Deciding move...";
 }
