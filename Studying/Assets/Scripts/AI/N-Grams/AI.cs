@@ -42,7 +42,7 @@ public class AI : Player
                 if (possibleKeysValues[key] == possibleKeysValues.Values.Max())
                     highestKeys.Add(key);
             }
-            SetMove(moveInfos[char.ToString(highestKeys[Random.Range(0, highestKeys.Count - 1)][nGram_Length - nGram_Window])]);
+            SetMove(moveInfos[char.ToString(highestKeys[Random.Range(0, highestKeys.Count)][nGram_Length - nGram_Window])]);
         }
         else
             RandomMove();

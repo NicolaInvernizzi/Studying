@@ -29,6 +29,13 @@ public class GameManager : MonoBehaviour
         Score(leftMove, rightMove);
         yield return new WaitForSeconds(simulationTime);
 
+        matchInfo.text = "Updating AI datas...";
+        yield return new WaitForSeconds(simulationTime);
+
+        for(int i = 0; i < players.Length; i++)
+            players[i].CheckAI()?.AIManagement(players[players.Length - (1 + i)].move);
+        yield return new WaitForSeconds(simulationTime);
+
         matchInfo.text = "Resetting...";
         yield return new WaitForSeconds(simulationTime);
 
@@ -37,13 +44,6 @@ public class GameManager : MonoBehaviour
             players[i].SetMove("");
             players[i].ShowMove();
         }
-        yield return new WaitForSeconds(simulationTime);
-
-        matchInfo.text = "Updating AI datas...";
-        yield return new WaitForSeconds(simulationTime);
-
-        for(int i = 0; i < players.Length; i++)
-            players[i].CheckAI()?.AIManagement(players[players.Length - (1 + i)].move);
         yield return new WaitForSeconds(simulationTime);
 
         matchInfo.text = "New match...";
