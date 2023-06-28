@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,12 @@ public class AI : Player
         { "S", "R" }
     };
     Dictionary<string, int> aiStatus = new Dictionary<string, int>();
+    Dictionary<string, float> probabilities = new Dictionary<string, float>()
+    {
+        { "R", 33 },
+        { "P", 33 },
+        { "S", 33 }
+    };
     public void RandomMove()
     {
         SetMove(moveInfos.ElementAt(UnityEngine.Random.Range(0, moveInfos.Keys.Count)).Key);
@@ -42,7 +49,7 @@ public class AI : Player
                 if (possibleKeysValues[key] == possibleKeysValues.Values.Max())
                     highestKeys.Add(key);
             }
-            SetMove(moveInfos[char.ToString(highestKeys[Random.Range(0, highestKeys.Count)][nGram_Length - nGram_Window])]);
+            SetMove(moveInfos[char.ToString(highestKeys[UnityEngine.Random.Range(0, highestKeys.Count)][nGram_Length - nGram_Window])]);
         }
         else
             RandomMove();
@@ -86,18 +93,18 @@ public class AI : Player
         }
         opponentLastMovesText.text = text;
     }
-    void PrintDictionary(Dictionary<string, int> toPrint)
+    void PrintDictionary()
     {
         int counter = 0;
         string text1 = "";
         string text2 = "";
 
-        foreach (string key in toPrint.Keys)
+        foreach (string key in aiStatus.Keys)
         {
             if (counter <= 17)
-                text1 += $"[{counter}] Key: {key}" + "  " + $"Value: {toPrint[key]}\n";
+                text1 += $"[{counter}] Key: {key}" + "  " + $"Value: {aiStatus[key]}\n";
             else
-                text2 += $"[{counter}] Key: {key}" + "  " + $"Value: {toPrint[key]}\n";
+                text2 += $"[{counter}] Key: {key}" + "  " + $"Value: {aiStatus[key]}\n";
             counter++;
         }
         aiInfosText1.text = text1;
@@ -105,7 +112,59 @@ public class AI : Player
     }
     void PrintProbability()
     {
+        int counter = 0;
+        string text = "";
 
+        foreach (string key in probabilities.Keys)
+        {
+            text += $"[{counter}] Key: {key}" + "  " + $"Value: {probabilities[key]}%\n";
+            counter++;
+        }
+        probabilityText.text = text;
+    }
+    void ProbabilityCalculation(string toFind)
+    {
+        List<string> keys = new List<string>(aiStatus.Keys);
+        List<string> keysP = new List<string>(probabilities.Keys);
+
+        if (keys.Count == 0)
+        {
+
+        }
+        //    return;
+        //foreach(string k in keys)
+        //{
+        //    if (FindPortionKey(k, toFind))
+        //        return;
+        //}
+
+
+        print(keys.All(k => FindPortionKey(k, toFind)));
+
+        if (!keys.All(k => FindPortionKey(k, toFind)))
+            return;
+        else
+        {
+            foreach(string key in keysP)
+                probabilities[key] = 0;
+        }
+
+        int total = 0;
+
+        print("1");
+ 
+        foreach (string key in keys)
+        {
+            if (FindPortionKey(key, toFind))
+            {
+                print("2");
+                probabilities[key] = aiStatus[key];
+                total += aiStatus[key];
+            }
+        }
+        print("3");
+        foreach (string key in keys)
+            probabilities[key] = (probabilities[key] / total) * 100;
     }
     public void AIManagement(string opponentMove)
     {
@@ -113,12 +172,14 @@ public class AI : Player
         if (opponentLastMoves.Count == nGram_Length)
             UpdateDictionary();
         PrintQueue(opponentLastMoves);
-        PrintDictionary(aiStatus);
-        // PrintProbability();
+        PrintDictionary();
+
+        ProbabilityCalculation(string.Join("", opponentLastMoves.Skip(nGram_Window)));
+        PrintProbability();
     }
     public IEnumerator Playing()
     {
-        yield return new WaitForSeconds(randomTime ? Random.Range(0.5f, simulationTime) : simulationTime);
+        yield return new WaitForSeconds(randomTime ? UnityEngine.Random.Range(0.5f, simulationTime) : simulationTime);
 
         if (aiStatus.Keys.Count > 0)
             AIMove();
