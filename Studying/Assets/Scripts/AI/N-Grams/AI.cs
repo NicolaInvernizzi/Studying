@@ -22,7 +22,7 @@ public class AI : Player
     };
     Dictionary<string, int> aiStatus = new Dictionary<string, int>();
 
-    //void Start() => NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Window)));
+    void Start() => NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Window)), true, false);
     public void RandomMove()
     {
         SetMove(moveInfos.ElementAt(UnityEngine.Random.Range(0, moveInfos.Keys.Count)).Key);
@@ -108,42 +108,63 @@ public class AI : Player
     }
     void PrintProbability(Dictionary<string, float> toPrint)
     {
-        print("Probability printed");
+        int c = 0;
+        string text;
 
-        int counter = 0;
-        string text = "";
-
+        if (opponentLastMoves.Count < nGram_Length)
+            text = $"Insufficient opponent last moves. The probabilies are:\n";
+        else
+            text = $"With {string.Join("", opponentLastMoves.Skip(nGram_Window))} the probabilies are:\n";
+    
         foreach (string key in toPrint.Keys)
         {
-            text += $"[{counter}] Key: {key}" + "  " + $"Value: {toPrint[key]}%\n";
-            counter++;
+            text += $"[{c}] Key: {key}" + "  " + $"Prob: {toPrint[key]}%\n";
+            c++;
         }
         probabilityText.text = text;
     }
-    void NewProbability(string toFind)
+
+    Dictionary <string, float> NewProbability(string toFind, bool print, bool getProbability)
     {
-        List<string> keys = new List<string>(aiStatus.Keys);
         Dictionary<string, float> probabilities = new Dictionary<string, float>()
         {
             { "R", 0 },
             { "P", 0 },
             { "S", 0 }
         };
-
+        List<string> statusKeys = new List<string>(aiStatus.Keys);
+        List<string> probKeys = new List<string>(probabilities.Keys);
+        List<float> probValues = new List<float>();
         List<string> foundedKeys = new List<string>();
-        foreach(string key in keys)
+
+        if (statusKeys.Exists(k => FindPortionKey(k, toFind)))
         {
-            if (FindPortionKey(key, toFind))
-                foundedKeys.Add(key);
+            foreach (string key in statusKeys)
+            {
+                if (FindPortionKey(key, toFind))
+                    foundedKeys.Add(key);
+            }
+            foreach (string key in foundedKeys)
+                probabilities[moveInfos[probabilities.Keys.ToList().
+                    Find(k => k == char.ToString(key[nGram_Length - nGram_Window]))]] = aiStatus[key];
+            foreach (string key in probKeys)
+                probValues.Add(Mathf.Floor((probabilities[key] / probabilities.Values.Sum()) * 100));
+            int c = 0;
+            foreach (string key in probKeys)
+            {
+                probabilities[key] = probValues[c];
+                c++;
+            }
         }
+        else
+            probKeys.ForEach(k => probabilities[k] = MathF.Floor(100/probKeys.Count));
 
-        foreach(string key in foundedKeys)
-            probabilities[moveInfos[probabilities.Keys.ToList().Find(k => k == char.ToString(key[nGram_Length - nGram_Window]))]] = aiStatus[key];
-        List<string> keysP = new List<string>(probabilities.Keys);
-        foreach (string key in keysP)
-            probabilities[key] /= probabilities.Values.Sum();
-
-        PrintProbability(probabilities);
+        if (print)
+            PrintProbability(probabilities);
+        if (getProbability)
+            return probabilities;
+        else
+            return null;
     }
     public void AIManagement(string opponentMove)
     {
@@ -153,7 +174,7 @@ public class AI : Player
         PrintQueue(opponentLastMoves);
         PrintDictionary();
 
-        //NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Window)));
+        NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Window)), true, false);
     }
     public IEnumerator Playing()
     {
