@@ -3,40 +3,41 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-public class GraphNode : MonoBehaviour
+public class GraphNode
 {
-    public int node;
-    public List<GraphNode> neighbors;
-    public GraphNode(int value)
+    public int id;
+    public List<GraphNode> linkedNodes;
+    public GraphNode(int id)
     {
-        this.node = value;
-        neighbors = new List<GraphNode>();
+        this.id = id;
+        linkedNodes = new List<GraphNode>();
     }
-    public bool AddNeighbor(GraphNode neighbor)
+    public bool AddLinkedNode(GraphNode neighbor)
     {
-        if (!neighbors.Contains(neighbor))
+        if (!linkedNodes.Contains(neighbor))
         {
-            neighbors.Add(neighbor);
+            linkedNodes.Add(neighbor);
             return true;
         }
         return false;
     }
-    public bool RemoveNeighbor(GraphNode neighbor) 
+    public bool RemoveLinkedNode(GraphNode neighbor) 
     {
-        if (neighbors.Contains(neighbor))
+        if (linkedNodes.Contains(neighbor))
         {
-            neighbors.Remove(neighbor);
+            linkedNodes.Remove(neighbor);
             return true;
         }
         return false;
     }
-    public void RemoveAllNeighbors() => neighbors.Clear();
+    public void RemoveAllLinkedNode() => linkedNodes.Clear();
     public override string ToString()
     {
         StringBuilder str = new StringBuilder();
-        str.Append($"Node {node} with neighbors: ");
-        foreach (GraphNode neighbor in neighbors)
-            str.Append($"{neighbor.node}, ");
+        str.Append($"Node {id} with LinkedNodes: ");
+        foreach (GraphNode neighbor in linkedNodes)
+            str.Append($"{neighbor.id}, ");
+        str.Append("\n");
         return str.ToString();
     }
 }
