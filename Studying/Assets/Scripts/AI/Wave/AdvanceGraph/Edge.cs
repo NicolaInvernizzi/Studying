@@ -6,9 +6,9 @@ public class Edge
 {
     public int weight;
     public Vertex adjacentVertex;
-    public Edge(Vertex adjacentVertex , int weight)
+    public Edge(int id, int weight)
     {
         this.weight = weight;
-        this.adjacentVertex = adjacentVertex;
+        adjacentVertex = new Vertex(id);
     }
 }

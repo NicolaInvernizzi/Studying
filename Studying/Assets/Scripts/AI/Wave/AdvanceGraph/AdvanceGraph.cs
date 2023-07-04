@@ -1,9 +1,9 @@
+using Newtonsoft.Json.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class AdvanceGraph : MonoBehaviour
 {
@@ -17,11 +17,13 @@ public class AdvanceGraph : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            this.AddVertex(1);
-            this.AddVertex(3);
-            this.AddVertex(3);
-            this.AddVertex(6);
-            this.AddVertex(4);
+            this.CreateVertex(3);
+            this.CreateVertex(1);
+            this.CreateVertex(6);
+            this.CreateVertex(4);
+            this.CreateMonoEdge(1, 3, 1);
+            this.CreateMonoEdge(1, 4, 5);
+            this.CreateDoubleEdge(6, 4, 2);
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
@@ -32,90 +34,103 @@ public class AdvanceGraph : MonoBehaviour
             this.PrintAdjanceyMatrix();
         }
     }
-    public bool AddVertex(int vertex)
+    public bool CreateVertex(int vertex)
     {
-        if (!vertices.Exists(v => v.id == vertex))
+        if (!ExistVertex(vertex, out Vertex v))
         {
             vertices.Add(new Vertex(vertex));
             return true;
         }
+        Debug.LogWarning($"Can't Create Vertex {vertex}: there's already one");
         return false;
-    }//ok
-    public bool AddEdge(int vertex, int adjacentVertex, int weight, bool outgoing, bool incoming)
+    }
+    public bool CreateMonoEdge(int fromVertex, int toVertex, int weight)
     {
-        if (ExistVertex(vertex, out Vertex v1) && ExistVertex(adjacentVertex, out Vertex v2))
+        if (ExistVertex(fromVertex, out Vertex v1) && ExistVertex(toVertex, out Vertex v2))
         {
-            if (outgoing)
-                v1.AddEdge(adjacentVertex, weight);
-            if (incoming)
-                v2.AddEdge(adjacentVertex, weight);
+            v1.AddEdge(v2.id, weight);
             return true;
         }
-        return false; 
-    }//ok
-
-    //public bool RemoveVertex(int vertex)
-    //{
-    //    if (ExistVertex(vertex, out Vertex v))
-    //    {
-    //        vertices.Remove(v);
-    //        vertices.ForEach(i => i.adjacentVertices.Remove(i.adjacentVertices.Find(v => v.id == vertex)));
-    //        return true;
-    //    }
-    //    return false;
-    //}
+        Debug.LogWarning($"Can't Create Mono Edge [{fromVertex} -> {toVertex} (w {weight})]:" +
+            $" Vertex {(v1 == null ? fromVertex.ToString() : toVertex.ToString())} doesn't exist");
+        return false;
+    }
+    public bool CreateDoubleEdge(int vertex1, int vertex2, int weight)
+    {
+        if (ExistVertex(vertex1, out Vertex v1) && ExistVertex(vertex2, out Vertex v2))
+        {
+            v1.AddEdge(v2.id, weight);
+            v2.AddEdge(v1.id, weight);
+            return true;
+        }
+        Debug.LogWarning($"Can't Create Double Edge [{vertex1} <-> {vertex2} (w {weight})]: " +
+            $"Vertex {(v1 == null? vertex1.ToString() : vertex2.ToString())} doesn't exist");
+        return false;
+    }
+    public bool RemoveVertex(int vertex)
+    {
+        if (ExistVertex(vertex, out Vertex v))
+        {
+            vertices.Remove(v);
+            vertices.ForEach(i => i.edges.Remove(i.edges.Find(v => v.adjacentVertex.id == vertex)));
+            return true;
+        }
+        Debug.LogWarning($"Can't remove Vertex {vertex}: it does not exist");
+        return false;
+    }
     public bool RemoveEdge(int vertex, int adjacentVertex, int weight)
     {
         if (ExistVertex(vertex, out Vertex v1))
         {
-            if(v1.RemoveEdge(weight, adjacentVertex))
+            if (v1.RemoveEdge(weight, adjacentVertex))
                 return true;
         }
+        Debug.LogWarning($"Can't remove Edge [{vertex} -> {adjacentVertex} (w {weight})]: it does not exist");
         return false;
-    }// ok
-    public void Clear()
+    }
+    public void ClearGraph()
     {
         vertices.ForEach(v => v.RemoveAllEdges());
         vertices.Clear();
-    }//ok
+        Debug.Log("Graph cleared");
+    }
     public void GraphStatus()
     {
         StringBuilder str = new StringBuilder();
+        str.AppendLine("Graph Status:");
         vertices.ForEach(v => str.Append(v.ToString()));
         print(str);
     }
     bool ExistVertex(int vertex, out Vertex v)
     {
-        v = vertices.Find(v => v.id == vertex);
-        if (v != null)
-            return true;
-        return false;
+        v = vertices.Find(i => i.id == vertex);
+        if (v == null)
+            return false;
+        return true;
     }
-    //void CreateAdjanceyMatrix()
-    //{
-    //    adjanceyMatrix = new int[vertices.Count, vertices.Count];
-    //    Sort(vertices);
+    void CreateAdjanceyMatrix()
+    {
+        adjanceyMatrix = new int[vertices.Count, vertices.Count];
+        Sort(vertices);
 
-    //    for (int i = 0; i < vertices.Count; i++)
-    //    {
-    //        if (vertices[i].adjacentVertices.Count != 0)
-    //        {
-    //            for (int j = 0; j < vertices[i].adjacentVertices.Count; j++)
-    //            {
-    //                adjanceyMatrix[i, vertices.IndexOf(vertices[i].adjacentVertices[j])] = 1;
-    //            }
-    //        }
-    //    }
-    //}
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            if (vertices[i].edges.Count != 0)
+            {
+                for (int j = 0; j < vertices[i].edges.Count; j++)
+                {
+                    adjanceyMatrix[i, vertices.IndexOf(vertices[i].edges[j].adjacentVertex)] = vertices[i].edges.Count;
+                }
+            }
+        }
+    }
     void PrintAdjanceyMatrix()
     {
-        //CreateAdjanceyMatrix();
+        CreateAdjanceyMatrix();
         StringBuilder str = new StringBuilder();
 
         str.Append("   ");
-        foreach (Vertex v in vertices)
-            str.Append($"[{v.id}]");
-
+        vertices.ForEach(v => str.Append($"[{v.id}]"));
         str.Append("\n");
 
         for (int raw = 0; raw < vertices.Count; raw++)
@@ -147,4 +162,5 @@ public class AdvanceGraph : MonoBehaviour
             toSort[j] = min;
         }
     }
+
 }

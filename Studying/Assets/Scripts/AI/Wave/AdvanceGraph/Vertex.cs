@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 public class Vertex
 {
@@ -13,36 +14,43 @@ public class Vertex
     }
     public bool AddEdge(int adjacentVertex, int weight)
     {
-        if (!FindEdge(adjacentVertex, weight, out Edge edge))
+        if (!ExistEdge(adjacentVertex, weight, out Edge edge))
         {
-            edges.Add(edge);
+            edges.Add(new Edge(adjacentVertex, weight));
             return true;
         }
+        Debug.LogWarning($"Can't Add Edge [{this.id} -> {adjacentVertex} (w {weight})]: there's already one");
         return false;
-    }//ok
-    public bool RemoveEdge(int adjacentVertex, int weight) //ok
+    }
+    public bool RemoveEdge(int adjacentVertex, int weight)
     {
-        if (FindEdge(adjacentVertex, weight, out Edge edge))
+        if (ExistEdge(adjacentVertex, weight, out Edge edge))
         {
             edges.Remove(edge);
             return true;
         }
+        Debug.LogWarning($"Can't Remove Edge [{this.id} -> {adjacentVertex} (w {weight}]]: it doesn't exist");
         return false;
     }
-    bool FindEdge(int adjacentVertex, int weight, out Edge edge)
+    public void RemoveAllEdges()
+    {
+        edges.Clear();
+        Debug.Log($"Vertex {this.id} edges cleared");
+    }
+    bool ExistEdge(int adjacentVertex, int weight, out Edge edge)
     {
         edge = edges.Find(e => e.adjacentVertex.id == adjacentVertex && e.weight == weight);
         if (edge != null)
             return true;
         return false;
     }
-    public void RemoveAllEdges() => edges.Clear();//ok
     public override string ToString()
     {
         StringBuilder str = new StringBuilder();
-        str.Append($"Node {id} with AdjacentVertices: ");
-        edges.ForEach(e => str.Append($"{e.adjacentVertex.id}-W{e.weight}, "));
+        str.Append($"Vertex {id} linked to: ");
+        Debug.Log(this.id);
+        edges.ForEach(e => str.Append($"id[{e.adjacentVertex.id}]-w[{e.weight}], "));
         str.Append("\n");
         return str.ToString();
-    }//ok
+    }
 }
