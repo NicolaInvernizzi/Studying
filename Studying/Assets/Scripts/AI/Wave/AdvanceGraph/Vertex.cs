@@ -5,13 +5,14 @@ using UnityEngine;
 
 public class Vertex
 {
-    public int id;
-    public List<Edge> edges;
+    public readonly int id;
+    public List<Edge> edges { get; private set; }
     public Vertex(int id)
     {
         this.id = id;
         edges = new List<Edge>();
     }
+
     public bool AddEdge(int adjacentVertex, int weight)
     {
         if (!ExistEdge(adjacentVertex, weight, out Edge edge))
@@ -37,20 +38,30 @@ public class Vertex
         edges.Clear();
         Debug.Log($"Vertex {this.id} edges cleared");
     }
+    public int CountEdges(int adjacentVertex)
+    {
+        int c = 0;
+        foreach (Edge edge in edges)
+        {
+            if (edge.adjacentVertex.id == adjacentVertex)
+                c++;
+        }
+        return c;
+    }
+    public override string ToString()
+    {
+        StringBuilder str = new StringBuilder();
+        str.Append($"Vertex {id} linked to: ");
+        edges.ForEach(e => str.Append($"id[{e.adjacentVertex.id}]-w[{e.weight}], "));
+        str.Append("\n");
+        return str.ToString();
+    }
+
     bool ExistEdge(int adjacentVertex, int weight, out Edge edge)
     {
         edge = edges.Find(e => e.adjacentVertex.id == adjacentVertex && e.weight == weight);
         if (edge != null)
             return true;
         return false;
-    }
-    public override string ToString()
-    {
-        StringBuilder str = new StringBuilder();
-        str.Append($"Vertex {id} linked to: ");
-        Debug.Log(this.id);
-        edges.ForEach(e => str.Append($"id[{e.adjacentVertex.id}]-w[{e.weight}], "));
-        str.Append("\n");
-        return str.ToString();
     }
 }
