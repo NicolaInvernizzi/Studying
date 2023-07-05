@@ -2,9 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AdvanceGraph : MonoBehaviour
 {
+    public int height;
+    public int lenght;
+    public Text adjacencyList_Text;
+    public Text adjacencyMatrix_Text;
     public List<Vertex> vertices { get; private set; }
     public int[,] adjanceyMatrix { get; private set; }
     public AdvanceGraph() 
@@ -16,29 +21,44 @@ public class AdvanceGraph : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            this.CreateVertex(3);
-            this.CreateVertex(1);
-            this.CreateVertex(6);
-            this.CreateVertex(4);
-            this.CreateMonoEdge(1, 4, 5);
-            this.CreateMonoEdge(1, 4, 2);
-            this.CreateMonoEdge(1, 4, 1);
-            this.CreateMonoEdge(1, 3, 1);
-            this.CreateMonoEdge(1, 3, 4);
-            this.CreateDoubleEdge(6, 4, 2);
-            this.CreateMonoEdge(6, 4, 2);
-            this.CreateMonoEdge(6, 4, 1);
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            this.AdjacencyList();
-        }
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            this.PrintAdjacencyMatrix();
+            ClearGraph();
+            GraphGeneration(height, lenght);
+            PrintAdjacencyMatrix();
+            PrintAdjacencyList();
         }
     }
 
+    public void GraphGeneration(int height, int lenght)
+    {
+        int[,] matrixMap = new int[height, lenght];
+        int id = 0;
+
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < lenght; j++)
+            {
+                matrixMap[i, j] = id;
+                CreateVertex(id);
+                id++;
+            }
+        }
+
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < lenght - 1; j++)
+            {
+                CreateDoubleEdge(matrixMap[i, j], matrixMap[i, j + 1], 1);
+            }
+        }
+
+        for (int j = 0; j < lenght; j++)
+        {
+            for (int i = 0; i < height - 1; i++)
+            {
+                CreateDoubleEdge(matrixMap[i, j], matrixMap[i + 1, j], 1);
+            }
+        }
+    }
     public bool CreateVertex(int vertex)
     {
         if (!ExistVertex(vertex, out Vertex v))
@@ -99,15 +119,14 @@ public class AdvanceGraph : MonoBehaviour
         vertices.Clear();
         Debug.Log("Graph cleared");
     }
-    public void AdjacencyList()
+    public void PrintAdjacencyList()
     {
         Sort(vertices);
         StringBuilder str = new StringBuilder();
         str.AppendLine("Adjacency List:");
         vertices.ForEach(v => str.Append(v.ToString()));
-        print(str);
+        adjacencyList_Text.text = str.ToString();
     }
-
     bool ExistVertex(int vertex, out Vertex v)
     {
         v = vertices.Find(i => i.id == vertex);
@@ -149,7 +168,7 @@ public class AdvanceGraph : MonoBehaviour
             }
             str.Append("\n");
         }
-        print(str);
+        adjacencyMatrix_Text.text = str.ToString();
     }
     void Sort(List<Vertex> toSort)
     {

@@ -51,8 +51,8 @@ public class Vertex
     public override string ToString()
     {
         StringBuilder str = new StringBuilder();
-        str.Append($"Vertex {id} linked to: ");
-        edges.ForEach(e => str.Append($"id[{e.adjacentVertex.id}]-w[{e.weight}], "));
+        str.Append($"Vertex {id}");
+        edges.ForEach(e => str.Append($" -> {e.adjacentVertex.id}[w{e.weight}]"));
         str.Append("\n");
         return str.ToString();
     }
