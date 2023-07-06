@@ -1,9 +1,11 @@
 using System;
+using UnityEngine;
 
 [Serializable]
 public class MapElement
 {
     public int id;
+    public GameObject prefab;
     public ElementRule[] rules;
 }
 

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class AdvanceGraph : MonoBehaviour
 {
+    //public List<Vertex> test = new List<Vertex>(){ new Vertex(1, new int[3] { 1, 2, 3 }), new Vertex(1, new int[3] { 1, 2, 3 })};
     public int debugVertex;
     public int height;
     public int lenght;
@@ -31,8 +32,6 @@ public class AdvanceGraph : MonoBehaviour
             GraphGeneration(height, lenght);
         if (GUILayout.Button("AdjacencyList"))
             PrintAdjacencyList();
-        if (GUILayout.Button("AdjacencyMatrix"))
-            PrintAdjacencyMatrix();
         if (GUILayout.Button("MapGeneration"))
             MapGeneratio();
         if (GUILayout.Button("DebugVertex"))
@@ -45,10 +44,8 @@ public class AdvanceGraph : MonoBehaviour
 
         print($"{currentVertex.id} {currentVertex.mapElement}");
 
-        // to debug.
-
-        //currentVertex.edges.First(e => e.id == Direction.Up).adjacentVertex.ModifyPossibleElements(
-        //    mapElements.First(e => e.id == currentVertex.mapElement).rules.First(r => r.direction == Direction.Up).constraints);
+        currentVertex.edges.First(e => e.id == Direction.Up).adjacentVertex.ModifyPossibleElements(
+            mapElements.First(e => e.id == currentVertex.mapElement).rules.First(r => r.direction == Direction.Up).constraints);
     }
     public void DebugVertex()
     {
@@ -263,6 +260,12 @@ public class AdvanceGraph : MonoBehaviour
             toSort[j] = min;
         }
     }
+    //public void Test(List<Vertex> v)
+    //{
+    //    Vertex vv = v[0];
+    //    vv.mapElement = 111;
+    //    print(test[0].mapElement);
+    //}
 }
 public enum Direction
 {
