@@ -6,86 +6,161 @@ using UnityEngine.UI;
 
 public class AdvanceGraph : MonoBehaviour
 {
+    public int debugVertex;
     public int height;
     public int lenght;
     public Text adjacencyList_Text;
     public Text adjacencyMatrix_Text;
-    public List<Vertex> vertices { get; private set; }
+    public static List<Vertex> vertices { get; private set; }
     public int[,] adjanceyMatrix { get; private set; }
+    public MapElement[] mapElements;
+    public List<MapRule> mapRoles;
+    public int[] elementsIds;
     public AdvanceGraph() 
     {
         vertices = new List<Vertex>();
     }
 
-    private void Update()
+    private void Start()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            ClearGraph();
-            GraphGeneration(height, lenght);
-            PrintAdjacencyMatrix();
-            PrintAdjacencyList();
-        }
+        elementsIds = GetElementsIds();
     }
+    private void OnGUI()
+    {
+        if (GUILayout.Button("GraphGeneration"))
+            GraphGeneration(height, lenght);
+        if (GUILayout.Button("AdjacencyList"))
+            PrintAdjacencyList();
+        if (GUILayout.Button("AdjacencyMatrix"))
+            PrintAdjacencyMatrix();
+        if (GUILayout.Button("MapGeneration"))
+            MapGeneratio();
+        if (GUILayout.Button("DebugVertex"))
+            DebugVertex();
+    }
+    public void MapGeneratio()
+    {
+        Vertex currentVertex = vertices[Random.Range(0, vertices.Count)];
+        currentVertex.SetRandomElement();
 
+        print($"{currentVertex.id} {currentVertex.mapElement}");
+
+        // to debug.
+
+        //currentVertex.edges.First(e => e.id == Direction.Up).adjacentVertex.ModifyPossibleElements(
+        //    mapElements.First(e => e.id == currentVertex.mapElement).rules.First(r => r.direction == Direction.Up).constraints);
+    }
+    public void DebugVertex()
+    {
+        Vertex toDebug = vertices.First(v => v.id == debugVertex);
+
+        print($"{toDebug.id} PossibleElements:");
+        foreach(int i in toDebug.possibleElements)
+            print(i);
+        print($"{toDebug.id} element: {toDebug.mapElement}");
+    }
+    public MapElement FindElement(int element)
+    {
+        MapElement mapElement;
+        try
+        {
+            mapElement = mapElements.First(e => e.id == element);
+        }
+        catch
+        {
+            mapElement = null;
+        }
+        return mapElement;
+    }
+    public int[] GetElementsIds()
+    {
+        int[] elements = new int[mapElements.Length];
+        for(int i = 0; i < elements.Length; i++)
+            elements[i] = mapElements[i].id;
+        return elements;
+    }
     public void GraphGeneration(int height, int lenght)
     {
         int[,] matrixMap = new int[height, lenght];
         int id = 0;
+        int[] possibleElements = elementsIds;
 
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < lenght; j++)
             {
                 matrixMap[i, j] = id;
-                CreateVertex(id);
+
+                Vertex currentVertex = CreateVertex(id, possibleElements);
+
+                if (i == 0)
+                    currentVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Up).constraints);
+                else if (i == height - 1)
+                    currentVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Down).constraints);
+
+                if (j == 0)
+                    currentVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Left).constraints);
+                else if (j == lenght - 1)
+                    currentVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Right).constraints);
+
                 id++;
+
+                if (possibleElements != elementsIds)
+                    possibleElements = elementsIds;
             }
         }
 
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < lenght - 1; j++)
-            {
-                CreateDoubleEdge(matrixMap[i, j], matrixMap[i, j + 1], 1);
-            }
+                CreateDoubleEdge(Direction.Right, matrixMap[i, j], matrixMap[i, j + 1], 1);
         }
 
         for (int j = 0; j < lenght; j++)
         {
             for (int i = 0; i < height - 1; i++)
-            {
-                CreateDoubleEdge(matrixMap[i, j], matrixMap[i + 1, j], 1);
-            }
+                CreateDoubleEdge(Direction.Down, matrixMap[i, j], matrixMap[i + 1, j], 1);
         }
     }
-    public bool CreateVertex(int vertex)
+    public Vertex CreateVertex(int vertex, int[] possibleElements)
     {
         if (!ExistVertex(vertex, out Vertex v))
         {
-            vertices.Add(new Vertex(vertex));
-            return true;
+            Vertex currentVertex = new Vertex(vertex, possibleElements);
+            vertices.Add(currentVertex);
+            return currentVertex;
         }
         Debug.LogWarning($"Can't Create Vertex {vertex}: there's already one");
-        return false;
+        return null;
     }
-    public bool CreateMonoEdge(int fromVertex, int toVertex, int weight)
+    public bool CreateMonoEdge(Direction edgeId, int fromVertex, int toVertex, int weight)
     {
         if (ExistVertex(fromVertex, out Vertex v1) && ExistVertex(toVertex, out Vertex v2))
         {
-            v1.AddEdge(v2.id, weight);
+            v1.AddEdge(edgeId, v2.id, weight);
             return true;
         }
         Debug.LogWarning($"Can't Create Mono Edge [{fromVertex} -> {toVertex} (w {weight})]:" +
             $" Vertex {(v1 == null ? fromVertex.ToString() : toVertex.ToString())} doesn't exist");
         return false;
     }
-    public bool CreateDoubleEdge(int vertex1, int vertex2, int weight)
+    public bool CreateDoubleEdge(Direction id,int vertex1, int vertex2, int weight)
     {
+        Direction inverseEdgeId;
         if (ExistVertex(vertex1, out Vertex v1) && ExistVertex(vertex2, out Vertex v2))
         {
-            v1.AddEdge(v2.id, weight);
-            v2.AddEdge(v1.id, weight);
+            v1.AddEdge(id, v2.id, weight);
+
+            switch(id)
+            {
+                case Direction.Right:
+                    inverseEdgeId = Direction.Left;
+                    break;
+                default:
+                    inverseEdgeId = Direction.Up;
+                    break;
+            }
+            v2.AddEdge(inverseEdgeId, v1.id, weight);
             return true;
         }
         Debug.LogWarning($"Can't Create Double Edge [{vertex1} <-> {vertex2} (w {weight})]: " +
@@ -124,7 +199,7 @@ public class AdvanceGraph : MonoBehaviour
         Sort(vertices);
         StringBuilder str = new StringBuilder();
         str.AppendLine("Adjacency List:");
-        vertices.ForEach(v => str.Append(v.ToString()));
+        vertices.ForEach(v => str.Append(v.Print(false)));
         adjacencyList_Text.text = str.ToString();
     }
     bool ExistVertex(int vertex, out Vertex v)
@@ -188,5 +263,12 @@ public class AdvanceGraph : MonoBehaviour
             toSort[j] = min;
         }
     }
-
+}
+public enum Direction
+{
+    None,
+    Up, 
+    Down, 
+    Left, 
+    Right
 }

@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -7,17 +7,28 @@ public class Vertex
 {
     public readonly int id;
     public List<Edge> edges { get; private set; }
-    public Vertex(int id)
+    public int mapElement = -1;
+    public int[] possibleElements;
+    public Vertex(int id, int[] possibleElements)
     {
         this.id = id;
+        this.possibleElements = possibleElements;
         edges = new List<Edge>();
     }
 
-    public bool AddEdge(int adjacentVertex, int weight)
+    public void ModifyPossibleElements(int[] toIntersect)
+    {
+        possibleElements = possibleElements.Intersect(toIntersect).ToArray();
+    }
+    public void SetRandomElement()
+    {
+        mapElement = possibleElements[Random.Range(0, possibleElements.Length)];
+    }
+    public bool AddEdge(Direction id, int adjacentVertex, int weight)
     {
         if (!ExistEdge(adjacentVertex, weight, out Edge edge))
         {
-            edges.Add(new Edge(adjacentVertex, weight));
+            edges.Add(new Edge(id, adjacentVertex, weight));
             return true;
         }
         Debug.LogWarning($"Can't Add Edge [{this.id} -> {adjacentVertex} (w {weight})]: there's already one");
@@ -48,15 +59,20 @@ public class Vertex
         }
         return c;
     }
-    public override string ToString()
+    public string Print(bool printWeight)
     {
         StringBuilder str = new StringBuilder();
-        str.Append($"Vertex {id}");
-        edges.ForEach(e => str.Append($" -> {e.adjacentVertex.id}[w{e.weight}]"));
+        str.Append($"V[{id}]: ");
+
+        foreach(Edge edge in edges)
+        {
+            str.Append($" [{edge.id} - {edge.adjacentVertex.id}]");
+            if (printWeight)
+                str.Append($"[w{edge.weight}]");
+        }
         str.Append("\n");
         return str.ToString();
     }
-
     bool ExistEdge(int adjacentVertex, int weight, out Edge edge)
     {
         edge = edges.Find(e => e.adjacentVertex.id == adjacentVertex && e.weight == weight);

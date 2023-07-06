@@ -1,11 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System;
 
-public class MapElement : MonoBehaviour
+[Serializable]
+public class MapElement
 {
-    public List<int> up = new List<int>();
-    public List<int> right = new List<int>();
-    public List<int> down = new List<int>();
-    public List<int> left = new List<int>();
+    public int id;
+    public ElementRule[] rules;
+}
+
+[Serializable]
+public class ElementRule
+{
+    public Direction direction;
+    public int[] constraints;
+}
+
+[Serializable]
+public class MapRule
+{
+    public Direction direction;
+    public int[] constraints;
 }
