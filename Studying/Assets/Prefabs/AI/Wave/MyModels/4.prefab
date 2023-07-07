@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 8175128394486418000}
   - component: {fileID: -4521613459834654554}
   m_Layer: 0
-  m_Name: Curve2
+  m_Name: 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -132,10 +132,10 @@ MonoBehaviour:
   id: 4
   rules:
   - direction: 1
-    constraints: 010000000300000006000000
-  - direction: 2
     constraints: 020000000300000006000000
+  - direction: 2
+    constraints: 010000000300000006000000
   - direction: 3
-    constraints: 020000000500000006000000
-  - direction: 4
     constraints: 010000000500000006000000
+  - direction: 4
+    constraints: 020000000500000006000000

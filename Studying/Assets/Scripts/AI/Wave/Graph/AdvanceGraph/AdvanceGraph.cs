@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class AdvanceGraph : MonoBehaviour
 {
+    public static AdvanceGraph instance;
     public int debugVertex;
     public int height;
     public int lenght;
@@ -25,6 +26,7 @@ public class AdvanceGraph : MonoBehaviour
 
     private void Start()
     {
+        instance = this;
         elementsIds = GetElementsIds();
     }
     private void OnGUI()
@@ -33,6 +35,8 @@ public class AdvanceGraph : MonoBehaviour
             PrintAdjacencyList();
         if (GUILayout.Button("MapGeneration"))
             MapGeneratio();
+        if (GUILayout.Button("SetMap"))
+            SetMap();
         if (GUILayout.Button("DebugVertices"))
             PrintVerticesInfos();
     }
@@ -40,18 +44,20 @@ public class AdvanceGraph : MonoBehaviour
     {
         return mapElements.First(e => e.id == id);
     }
+    public void SetMap()
+    {
+        Vertex currentVertex = vertices[Random.Range(0, vertices.Count)];
+        currentVertex.SetRandomElement();
+
+        MapElement mapElement = GetMapElement(currentVertex.mapElement);
+        currentVertex.UpdateAdjacent(mapElement);
+        PrintVerticesInfos();
+    }
     public void MapGeneratio()
     {
         ClearGraph();
         GraphGeneration(height, lenght);
-
-        Vertex currentVertex = vertices[Random.Range(0, vertices.Count)];
-        currentVertex.SetRandomElement();
-
-        print($"{currentVertex.id} {currentVertex.mapElement}");
-
-        MapElement mapElement = GetMapElement(currentVertex.mapElement);
-        currentVertex.UpdateAdjacent(mapElement);
+        PrintVerticesInfos();
     }
     public void DebugVertex()
     {

@@ -3,13 +3,13 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-public class Vertex
+public class NewVertex
 {
-    public readonly int id;
-    public List<Edge> edges { get; private set; }
+    public int id;
+    public List<Edge> edges;
     public int mapElement = -1;
     public int[] possibleElements;
-    public Vertex(int id, int[] possibleElements)
+    public NewVertex(int id, int[] possibleElements)
     {
         this.id = id;
         this.possibleElements = possibleElements;
@@ -31,24 +31,19 @@ public class Vertex
     public void SetRandomElement()
     {
         mapElement = possibleElements[Random.Range(0, possibleElements.Length)];
-        AdvanceGraph.instance.RemoveVertex(id);
+        possibleElements = null;
+        //MapGeneration.instance.RemoveVertex(id);
     }
-    public bool AddEdge(Direction id, int adjacentVertex, int weight)
+    public void AddEdge(Direction id, int adjacentNewVertex, int weight)
     {
-        if (!ExistEdge(adjacentVertex, weight, out Edge edge))
-        {
-            edges.Add(new Edge(id, adjacentVertex, weight));
-            return true;
-        }
-        Debug.LogWarning($"Can't Add Edge [{this.id} -> {adjacentVertex} (w {weight})]: there's already one");
-        return false;
+        edges.Add(new Edge(id, adjacentNewVertex, weight));
     }
     public string Print1(bool printWeight)
     {
         StringBuilder str = new StringBuilder();
         str.Append($"V[{id}]: ");
 
-        foreach(Edge edge in edges)
+        foreach (Edge edge in edges)
         {
             str.Append($" [{edge.id} - {edge.adjacentVertex.id}]");
             if (printWeight)
@@ -73,36 +68,5 @@ public class Vertex
 
         str.Append("\n");
         return str.ToString();
-    }
-    bool ExistEdge(int adjacentVertex, int weight, out Edge edge)
-    {
-        edge = edges.Find(e => e.adjacentVertex.id == adjacentVertex && e.weight == weight);
-        if (edge != null)
-            return true;
-        return false;
-    }
-    public bool RemoveEdge(int adjacentVertex, int weight)
-    {
-        if (ExistEdge(adjacentVertex, weight, out Edge edge))
-        {
-            edges.Remove(edge);
-            return true;
-        }
-        Debug.LogWarning($"Can't Remove Edge [{this.id} -> {adjacentVertex} (w {weight}]]: it doesn't exist");
-        return false;
-    }
-    public void RemoveAllEdges()
-    {
-        edges.Clear();
-    }
-    public int CountEdges(int adjacentVertex)
-    {
-        int c = 0;
-        foreach (Edge edge in edges)
-        {
-            if (edge.adjacentVertex.id == adjacentVertex)
-                c++;
-        }
-        return c;
     }
 }
