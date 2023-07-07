@@ -16,13 +16,14 @@ public class Vertex
         edges = new List<Edge>();
     }
 
-    public void UpdateAdjacent()
+    public void UpdateAdjacent(MapElement mapElement)
     {
+        Debug.Log("---");
+        Debug.Log(mapElement.rules.First(r => r.direction == Direction.Left).constraints[0]);
+        Debug.Log(mapElement.rules.First(r => r.direction == Direction.Left).constraints[1]);
+        Debug.Log(mapElement.rules.First(r => r.direction == Direction.Left).constraints[2]);
         foreach(Edge edge in edges)
-        {
-            MapElement mpE = AdvanceGraph.mapElements.First(e => e.id == mapElement);
-            edge.adjacentVertex.ModifyPossibleElements(mpE.rules.First(r => r.direction == edge.id).constraints);
-        }
+            edge.adjacentVertex.ModifyPossibleElements(mapElement.rules.First(r => r.direction == edge.id).constraints);
     }
     public void ModifyPossibleElements(int[] toIntersect)
     {
@@ -57,7 +58,6 @@ public class Vertex
     public void RemoveAllEdges()
     {
         edges.Clear();
-        Debug.Log($"Vertex {this.id} edges cleared");
     }
     public int CountEdges(int adjacentVertex)
     {
@@ -69,7 +69,7 @@ public class Vertex
         }
         return c;
     }
-    public string Print(bool printWeight)
+    public string Print1(bool printWeight)
     {
         StringBuilder str = new StringBuilder();
         str.Append($"V[{id}]: ");
@@ -80,6 +80,18 @@ public class Vertex
             if (printWeight)
                 str.Append($"[w{edge.weight}]");
         }
+        str.Append("\n");
+        return str.ToString();
+    }
+    public string Print2()
+    {
+        StringBuilder str = new StringBuilder();
+
+        str.Append($" id [{this.id}] - Element [{mapElement}] - Possibles ");
+
+        foreach (int i in this.possibleElements)
+            str.Append($"[{i}]");
+
         str.Append("\n");
         return str.ToString();
     }

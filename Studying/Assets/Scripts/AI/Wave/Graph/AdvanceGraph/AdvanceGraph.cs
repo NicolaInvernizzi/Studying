@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +12,10 @@ public class AdvanceGraph : MonoBehaviour
     public int lenght;
     public Text adjacencyList_Text;
     public Text adjacencyMatrix_Text;
+    public Text verticesInfos_Text;
     public static List<Vertex> vertices { get; private set; }
     public int[,] adjanceyMatrix { get; private set; }
-    static public MapElement[] mapElements;
+    public MapElement[] mapElements;
     public List<MapRule> mapRoles;
     public int[] elementsIds;
     public AdvanceGraph() 
@@ -27,24 +29,29 @@ public class AdvanceGraph : MonoBehaviour
     }
     private void OnGUI()
     {
-        if (GUILayout.Button("GraphGeneration"))
-            GraphGeneration(height, lenght);
         if (GUILayout.Button("AdjacencyList"))
             PrintAdjacencyList();
         if (GUILayout.Button("MapGeneration"))
             MapGeneratio();
-        if (GUILayout.Button("DebugVertex"))
-            DebugVertex();
+        if (GUILayout.Button("DebugVertices"))
+            PrintVerticesInfos();
+    }
+    public MapElement GetMapElement(int id)
+    {
+        return mapElements.First(e => e.id == id);
     }
     public void MapGeneratio()
     {
+        ClearGraph();
+        GraphGeneration(height, lenght);
+
         Vertex currentVertex = vertices[Random.Range(0, vertices.Count)];
         currentVertex.SetRandomElement();
 
         print($"{currentVertex.id} {currentVertex.mapElement}");
 
-        currentVertex.edges.First(e => e.id == Direction.Up).adjacentVertex.ModifyPossibleElements(
-            mapElements.First(e => e.id == currentVertex.mapElement).rules.First(r => r.direction == Direction.Up).constraints);
+        MapElement mapElement = GetMapElement(currentVertex.mapElement);
+        currentVertex.UpdateAdjacent(mapElement);
     }
     public void DebugVertex()
     {
@@ -195,7 +202,7 @@ public class AdvanceGraph : MonoBehaviour
         Sort(vertices);
         StringBuilder str = new StringBuilder();
         str.AppendLine("Adjacency List:");
-        vertices.ForEach(v => str.Append(v.Print(false)));
+        vertices.ForEach(v => str.Append(v.Print1(false)));
         adjacencyList_Text.text = str.ToString();
     }
     bool ExistVertex(int vertex, out Vertex v)
@@ -258,6 +265,12 @@ public class AdvanceGraph : MonoBehaviour
             toSort[toSort.IndexOf(min)] = swap;
             toSort[j] = min;
         }
+    }
+    void PrintVerticesInfos()
+    {
+        StringBuilder str = new StringBuilder();
+        vertices.ForEach(v => str.Append(v.Print2()));
+        verticesInfos_Text.text = str.ToString(); 
     }
 }
 public enum Direction
