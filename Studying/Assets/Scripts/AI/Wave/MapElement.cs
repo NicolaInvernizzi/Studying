@@ -1,24 +1,15 @@
 using System;
 using UnityEngine;
 
-[Serializable]
-public class MapElement
+public class MapElement : MonoBehaviour
 {
     public int id;
-    public GameObject prefab;
-    public ElementRule[] rules;
+    public ElementRule[] rules = new ElementRule[4]
+    {
+        new ElementRule(Direction.Up),
+        new ElementRule(Direction.Down),
+        new ElementRule(Direction.Left),
+        new ElementRule(Direction.Right),
+    };
 }
 
-[Serializable]
-public class ElementRule
-{
-    public Direction direction;
-    public int[] constraints;
-}
-
-[Serializable]
-public class MapRule
-{
-    public Direction direction;
-    public int[] constraints;
-}

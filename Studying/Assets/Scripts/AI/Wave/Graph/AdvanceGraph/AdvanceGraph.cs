@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class AdvanceGraph : MonoBehaviour
 {
-    //public List<Vertex> test = new List<Vertex>(){ new Vertex(1, new int[3] { 1, 2, 3 }), new Vertex(1, new int[3] { 1, 2, 3 })};
     public int debugVertex;
     public int height;
     public int lenght;
@@ -14,7 +13,7 @@ public class AdvanceGraph : MonoBehaviour
     public Text adjacencyMatrix_Text;
     public static List<Vertex> vertices { get; private set; }
     public int[,] adjanceyMatrix { get; private set; }
-    public MapElement[] mapElements;
+    static public MapElement[] mapElements;
     public List<MapRule> mapRoles;
     public int[] elementsIds;
     public AdvanceGraph() 
@@ -260,12 +259,6 @@ public class AdvanceGraph : MonoBehaviour
             toSort[j] = min;
         }
     }
-    //public void Test(List<Vertex> v)
-    //{
-    //    Vertex vv = v[0];
-    //    vv.mapElement = 111;
-    //    print(test[0].mapElement);
-    //}
 }
 public enum Direction
 {

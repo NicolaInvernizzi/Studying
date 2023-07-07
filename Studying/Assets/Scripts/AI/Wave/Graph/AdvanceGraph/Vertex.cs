@@ -16,8 +16,18 @@ public class Vertex
         edges = new List<Edge>();
     }
 
+    public void UpdateAdjacent()
+    {
+        foreach(Edge edge in edges)
+        {
+            MapElement mpE = AdvanceGraph.mapElements.First(e => e.id == mapElement);
+            edge.adjacentVertex.ModifyPossibleElements(mpE.rules.First(r => r.direction == edge.id).constraints);
+        }
+    }
     public void ModifyPossibleElements(int[] toIntersect)
     {
+        if (mapElement == -1)
+            return;
         possibleElements = possibleElements.Intersect(toIntersect).ToArray();
     }
     public void SetRandomElement()
