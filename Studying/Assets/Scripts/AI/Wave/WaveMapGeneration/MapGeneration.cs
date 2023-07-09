@@ -28,7 +28,7 @@ public class MapGeneration : MonoBehaviour
         if (GUILayout.Button("AdjacencyList"))
             PrintAdjacencyList();
         if (GUILayout.Button("SetMap"))
-            SetMap();
+            UpdateMap();
     }
     public void RemoveVertex(int vertex)
     {
@@ -43,32 +43,12 @@ public class MapGeneration : MonoBehaviour
         vertices.ForEach(v => str.Append(v.Print1(false)));
         adjacencyList_Text.text = str.ToString();
     }
-    public void SetMap()
+    public void UpdateMap()
     {
-        //while(vertices.Count > 0)
-        //{
-
-        //}
-
         prevVertices.Push(vertices);
         currentVertex = vertices[Random.Range(0, vertices.Count)];
-
         currentVertex.SetRandomElement();
-        Element mapElement = mapElements.First(e => e == currentVertex.currentElement);
-
-        //foreach(NewVertex vertex in vertices)
-        //{
-        //    if (vertex.mapElementId == -1)
-
-        //}
-        currentVertex.UpdateAdjacent(mapElement);
-
-        //if (vertices.Exists(v => v.possibleElements.Length == 0))
-        //{
-        //    vertices = prevVertices.Pop();
-        //    currentVertex.RemovePossibleElement(mapElement);
-        //}
-
+        vertices.ForEach(v => v.updated = false);
         PrintVerticesInfos();
     }
     public void GraphGeneration(int height, int lenght)

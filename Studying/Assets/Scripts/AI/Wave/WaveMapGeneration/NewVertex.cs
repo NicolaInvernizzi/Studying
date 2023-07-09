@@ -9,6 +9,8 @@ public class NewVertex
     public List<Edge> edges;
     public Element currentElement;
     public Element[] possibleElements;
+    public List<Element> triedElements;
+    public bool updated;
     public NewVertex(int id, Element[] possibleElements)
     {
         this.id = id;
@@ -20,25 +22,26 @@ public class NewVertex
     {
         possibleElements = possibleElements.Where(e => e != element).ToArray();
     }
-    public void UpdateAdjacent(Element mapElement)
-    {
-        if (possibleElements.Length == 1)
-        {
-            foreach (Edge edge in edges)
-                edge.adjacentVertex.ModifyPossibleElements(mapElement.rules.First(r => r.direction == edge.id).constraints);
-        }
-    }
     public void ModifyPossibleElements(Element[] toIntersect)
     {
-        if (currentElement != null)
+        if (currentElement != null && !updated)
             return;
 
         possibleElements = possibleElements.Intersect(toIntersect).ToArray();
+        UpdateAdjacent();
+        updated = true;
     }
     public void SetRandomElement()
     {
         currentElement = possibleElements[Random.Range(0, possibleElements.Length)];
-        possibleElements = null;
+        Debug.Log($"V{id}, E:{currentElement.name}");
+        RemovePossibleElement(currentElement);
+        UpdateAdjacent();
+    }
+    void UpdateAdjacent()
+    {
+        foreach (Edge edge in edges)
+            edge.adjacentVertex.ModifyPossibleElements(currentElement.rules.First(r => r.direction == edge.id).constraints);
     }
     public void AddEdge(Direction id, int adjacentNewVertex, int weight)
     {
