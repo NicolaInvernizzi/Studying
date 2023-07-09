@@ -9,17 +9,17 @@ public class MapGeneration : MonoBehaviour
     public static MapGeneration instance;
     public int height;
     public int lenght;
-    public MapElement[] mapElements;
-    public List<MapRule> mapRoles;
+    public Element[] mapElements;
+    public List<Rule> mapRules;
     public Text adjacencyList_Text;
     public Text verticesInfos_Text;
+    Stack<List<NewVertex>> prevVertices = new Stack<List<NewVertex>>();
     [HideInInspector] public List<NewVertex> vertices = new List<NewVertex>();
-    [HideInInspector] public int[] elementsIds;
+    NewVertex currentVertex;
 
     private void Start()
     {
         instance = this;
-        elementsIds = GetElementsIds();
         GraphGeneration(height, lenght);
         PrintVerticesInfos();
     }
@@ -45,18 +45,36 @@ public class MapGeneration : MonoBehaviour
     }
     public void SetMap()
     {
-        NewVertex currentNewVertex = vertices[Random.Range(0, vertices.Count)];
-        currentNewVertex.SetRandomElement();
+        //while(vertices.Count > 0)
+        //{
 
-        MapElement mapElement = mapElements.First(e => e.id == currentNewVertex.mapElement);
-        currentNewVertex.UpdateAdjacent(mapElement);
+        //}
+
+        prevVertices.Push(vertices);
+        currentVertex = vertices[Random.Range(0, vertices.Count)];
+
+        currentVertex.SetRandomElement();
+        Element mapElement = mapElements.First(e => e == currentVertex.currentElement);
+
+        //foreach(NewVertex vertex in vertices)
+        //{
+        //    if (vertex.mapElementId == -1)
+
+        //}
+        currentVertex.UpdateAdjacent(mapElement);
+
+        //if (vertices.Exists(v => v.possibleElements.Length == 0))
+        //{
+        //    vertices = prevVertices.Pop();
+        //    currentVertex.RemovePossibleElement(mapElement);
+        //}
+
         PrintVerticesInfos();
     }
     public void GraphGeneration(int height, int lenght)
     {
         int[,] matrixMap = new int[height, lenght];
         int id = 0;
-        int[] possibleElements = elementsIds;
 
         for (int i = 0; i < height; i++)
         {
@@ -64,22 +82,19 @@ public class MapGeneration : MonoBehaviour
             {
                 matrixMap[i, j] = id;
 
-                NewVertex currentNewVertex = CreateNewVertex(id, possibleElements);
+                NewVertex currentNewVertex = CreateNewVertex(id, mapElements);
 
                 if (i == 0)
-                    currentNewVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Up).constraints);
+                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Up).constraints);
                 else if (i == height - 1)
-                    currentNewVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Down).constraints);
+                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Down).constraints);
 
                 if (j == 0)
-                    currentNewVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Left).constraints);
+                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Left).constraints);
                 else if (j == lenght - 1)
-                    currentNewVertex.ModifyPossibleElements(mapRoles.First(r => r.direction == Direction.Right).constraints);
+                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Right).constraints);
 
                 id++;
-
-                if (possibleElements != elementsIds)
-                    possibleElements = elementsIds;
             }
         }
 
@@ -95,7 +110,7 @@ public class MapGeneration : MonoBehaviour
                 CreateDoubleEdge(Direction.Down, matrixMap[i, j], matrixMap[i + 1, j], 1);
         }
     }
-    public NewVertex CreateNewVertex(int newVertex, int[] possibleElements)
+    public NewVertex CreateNewVertex(int newVertex, Element[] possibleElements)
     {
         NewVertex currentNewVertex = new NewVertex(newVertex, possibleElements);
         vertices.Add(currentNewVertex);
@@ -119,13 +134,6 @@ public class MapGeneration : MonoBehaviour
                 break;
         }
         v2.AddEdge(inverseEdgeId, v1.id, weight);
-    }
-    public int[] GetElementsIds()
-    {
-        int[] elements = new int[mapElements.Length];
-        for (int i = 0; i < elements.Length; i++)
-            elements[i] = mapElements[i].id;
-        return elements;
     }
     void PrintVerticesInfos()
     {

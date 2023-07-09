@@ -423,7 +423,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.53120357, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.5529938, y: 0}
+  m_AnchoredPosition: {x: 1.553009, y: 0}
   m_SizeDelta: {x: -2.105999, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &240014579
@@ -1374,25 +1374,35 @@ MonoBehaviour:
   height: 4
   lenght: 4
   mapElements:
-  - {fileID: -4249459697898805984, guid: 94e2db9ecf786bd4b8ce292af876f170, type: 3}
-  - {fileID: -153957113461418965, guid: 386bb0f84f448b54eb0b0ac68cd28392, type: 3}
-  - {fileID: 8111265301403434206, guid: 28d4273d09a3a4b4bb49835927ce3be6, type: 3}
-  - {fileID: -4521613459834654554, guid: 7180e661bec0d3b4d934056914f4ea66, type: 3}
-  - {fileID: -85567590037408058, guid: 3c4d64c367ab1f047ad8fe403a0d9699, type: 3}
-  - {fileID: 7697269235702257726, guid: 92bb1a3ea06fe5e49a183323fc7cb252, type: 3}
-  mapRoles:
+  - {fileID: 11400000, guid: 62a01e68b1420454f9e2d5a3eb66e79d, type: 2}
+  - {fileID: 11400000, guid: bde48bdc56ea2d143bd744e2f0f5948e, type: 2}
+  - {fileID: 11400000, guid: 9e46371da1a86e842998be58554e5a29, type: 2}
+  - {fileID: 11400000, guid: 18e696c347dacd746bc3701ca9d1a377, type: 2}
+  - {fileID: 11400000, guid: b4742197b3b257343911ac8664c27222, type: 2}
+  - {fileID: 11400000, guid: 5473c1fe5628e354887b30871736e265, type: 2}
+  mapRules:
+  - direction: 0
+    constraints:
+    - {fileID: 11400000, guid: 62a01e68b1420454f9e2d5a3eb66e79d, type: 2}
+    - {fileID: 11400000, guid: 9e46371da1a86e842998be58554e5a29, type: 2}
+    - {fileID: 11400000, guid: 5473c1fe5628e354887b30871736e265, type: 2}
   - direction: 1
-    constraints: 010000000300000006000000
+    constraints:
+    - {fileID: 11400000, guid: 62a01e68b1420454f9e2d5a3eb66e79d, type: 2}
+    - {fileID: 11400000, guid: 18e696c347dacd746bc3701ca9d1a377, type: 2}
+    - {fileID: 11400000, guid: b4742197b3b257343911ac8664c27222, type: 2}
   - direction: 2
-    constraints: 010000000400000005000000
+    constraints:
+    - {fileID: 11400000, guid: bde48bdc56ea2d143bd744e2f0f5948e, type: 2}
+    - {fileID: 11400000, guid: b4742197b3b257343911ac8664c27222, type: 2}
+    - {fileID: 11400000, guid: 5473c1fe5628e354887b30871736e265, type: 2}
   - direction: 3
-    constraints: 020000000500000006000000
-  - direction: 4
-    constraints: 020000000300000004000000
+    constraints:
+    - {fileID: 11400000, guid: bde48bdc56ea2d143bd744e2f0f5948e, type: 2}
+    - {fileID: 11400000, guid: 9e46371da1a86e842998be58554e5a29, type: 2}
+    - {fileID: 11400000, guid: 18e696c347dacd746bc3701ca9d1a377, type: 2}
   adjacencyList_Text: {fileID: 1134878592}
   verticesInfos_Text: {fileID: 159177117}
-  vertices: []
-  elementsIds: 
 --- !u!1001 &681645254
 PrefabInstance:
   m_ObjectHideFlags: 0

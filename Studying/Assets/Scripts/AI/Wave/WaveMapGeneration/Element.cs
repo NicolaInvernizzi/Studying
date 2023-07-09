@@ -1,8 +1,9 @@
 using UnityEngine;
 
-public class MapElement : MonoBehaviour
+[CreateAssetMenu(fileName = "New Element", menuName = "MapElement")]
+public class Element : ScriptableObject
 {
-    public int id;
+    public GameObject prefab;
     public Rule[] rules = new Rule[4]
     {
         new Rule(Direction.Up),
@@ -11,4 +12,3 @@ public class MapElement : MonoBehaviour
         new Rule(Direction.Right),
     };
 }
-

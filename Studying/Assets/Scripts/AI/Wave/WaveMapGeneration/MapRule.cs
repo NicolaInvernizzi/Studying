@@ -1,20 +1,20 @@
 using System;
 
 [Serializable]
-public class MapRule
+public class Rule
 {
     public Direction direction;
-    public int[] constraints;
-}
+    public Element[] constraints;
 
-[Serializable]
-public class ElementRule
-{
-    public Direction direction;
-    public int[] constraints;
-
-    public ElementRule (Direction direction)
+    public Rule (Direction direction)
     {
         this.direction = direction;
     }
+}
+public enum Direction
+{
+    Up,
+    Down,
+    Left,
+    Right
 }

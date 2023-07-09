@@ -7,32 +7,38 @@ public class NewVertex
 {
     public int id;
     public List<Edge> edges;
-    public int mapElement = -1;
-    public int[] possibleElements;
-    public NewVertex(int id, int[] possibleElements)
+    public Element currentElement;
+    public Element[] possibleElements;
+    public NewVertex(int id, Element[] possibleElements)
     {
         this.id = id;
         this.possibleElements = possibleElements;
         edges = new List<Edge>();
     }
 
-    public void UpdateAdjacent(MapElement mapElement)
+    public void RemovePossibleElement(Element element)
     {
-        foreach (Edge edge in edges)
-            edge.adjacentVertex.ModifyPossibleElements(mapElement.rules.First(r => r.direction == edge.id).constraints);
+        possibleElements = possibleElements.Where(e => e != element).ToArray();
     }
-    public void ModifyPossibleElements(int[] toIntersect)
+    public void UpdateAdjacent(Element mapElement)
     {
-        if (mapElement != -1)
+        if (possibleElements.Length == 1)
+        {
+            foreach (Edge edge in edges)
+                edge.adjacentVertex.ModifyPossibleElements(mapElement.rules.First(r => r.direction == edge.id).constraints);
+        }
+    }
+    public void ModifyPossibleElements(Element[] toIntersect)
+    {
+        if (currentElement != null)
             return;
 
         possibleElements = possibleElements.Intersect(toIntersect).ToArray();
     }
     public void SetRandomElement()
     {
-        mapElement = possibleElements[Random.Range(0, possibleElements.Length)];
+        currentElement = possibleElements[Random.Range(0, possibleElements.Length)];
         possibleElements = null;
-        //MapGeneration.instance.RemoveVertex(id);
     }
     public void AddEdge(Direction id, int adjacentNewVertex, int weight)
     {
@@ -56,12 +62,13 @@ public class NewVertex
     {
         StringBuilder str = new StringBuilder();
 
-        str.Append($" id [{this.id}] - Element [{mapElement}] - Possibles ");
+        string txt = currentElement == null ? "X" : currentElement.name;
+        str.Append($" id [{this.id}] - Element [{txt}] - Possibles ");
 
         if (possibleElements != null)
         {
-            foreach (int i in this.possibleElements)
-                str.Append($"[{i}]");
+            foreach (Element i in this.possibleElements)
+                str.Append($"[{i.name}]");
         }
         else
             str.Append("null");
