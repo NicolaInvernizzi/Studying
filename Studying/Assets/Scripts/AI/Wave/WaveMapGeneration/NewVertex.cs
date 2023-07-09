@@ -24,24 +24,28 @@ public class NewVertex
     }
     public void ModifyPossibleElements(Element[] toIntersect)
     {
-        if (currentElement != null && !updated)
+        // || updated
+        if (currentElement != null)
             return;
 
         possibleElements = possibleElements.Intersect(toIntersect).ToArray();
-        UpdateAdjacent();
-        updated = true;
+        //updated = true;
+        //UpdateAdjacent();
     }
     public void SetRandomElement()
     {
         currentElement = possibleElements[Random.Range(0, possibleElements.Length)];
+        possibleElements = possibleElements.Where(e => e == currentElement).ToArray();
         Debug.Log($"V{id}, E:{currentElement.name}");
-        RemovePossibleElement(currentElement);
         UpdateAdjacent();
     }
     void UpdateAdjacent()
     {
-        foreach (Edge edge in edges)
-            edge.adjacentVertex.ModifyPossibleElements(currentElement.rules.First(r => r.direction == edge.id).constraints);
+        foreach(Element element in possibleElements)
+        {
+            foreach (Edge edge in edges)
+                edge.adjacentVertex.ModifyPossibleElements(element.rules.First(r => r.direction == edge.id).constraints);
+        }
     }
     public void AddEdge(Direction id, int adjacentNewVertex, int weight)
     {

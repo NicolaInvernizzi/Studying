@@ -27,7 +27,7 @@ public class MapGeneration : MonoBehaviour
     {
         if (GUILayout.Button("AdjacencyList"))
             PrintAdjacencyList();
-        if (GUILayout.Button("SetMap"))
+        if (GUILayout.Button("UpdateMap"))
             UpdateMap();
     }
     public void RemoveVertex(int vertex)
