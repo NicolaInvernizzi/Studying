@@ -16,12 +16,19 @@ public class MapGeneration : MonoBehaviour
     Stack<List<NewVertex>> prevVertices = new Stack<List<NewVertex>>();
     [HideInInspector] public List<NewVertex> vertices = new List<NewVertex>();
     NewVertex currentVertex;
+    [HideInInspector] public bool stopUpdating;
+    [HideInInspector] public Element currentElement;
+    public float elementSize;
+    List<NewVertex> creationList = new List<NewVertex>();
 
     private void Start()
     {
         instance = this;
         GraphGeneration(height, lenght);
         PrintVerticesInfos();
+
+        prevVertices.Push(vertices);
+        currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
     }
     private void OnGUI()
     {
@@ -29,6 +36,12 @@ public class MapGeneration : MonoBehaviour
             PrintAdjacencyList();
         if (GUILayout.Button("UpdateMap"))
             UpdateMap();
+        if (GUILayout.Button("CreateMap"))
+            CreateMap();
+    }
+    public void CreateMap()
+    {
+        creationList.ForEach(v => v.InstantiatePrefab());
     }
     public void RemoveVertex(int vertex)
     {
@@ -45,11 +58,48 @@ public class MapGeneration : MonoBehaviour
     }
     public void UpdateMap()
     {
-        prevVertices.Push(vertices);
-        currentVertex = vertices[Random.Range(0, vertices.Count)];
+        // - START -
         currentVertex.SetRandomElement();
-        vertices.ForEach(v => v.updated = false);
-        PrintVerticesInfos();
+
+        // - STOP -
+        if (stopUpdating)
+        {
+            // remove from the wave - origin vertex the error element
+            currentVertex.RemovePossibleElement(currentElement);
+            stopUpdating = false;
+
+            // turn back
+            vertices = prevVertices.Pop();
+        }
+        else // - CONTINUE -
+        {
+            vertices.ForEach(v => v.updated = false);
+            prevVertices.Push(vertices);
+            PrintVerticesInfos();
+
+            if (vertices.Exists(v => v.currentElement == null))
+                currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
+        }
+
+        //while (vertices.Exists(v => v.currentElement == null))
+        //{
+
+        //}
+    }
+    public NewVertex LowestEntropy()
+    {
+        int lowest = mapElements.Length;
+
+        foreach(NewVertex v in vertices)
+        {
+            if (v.possibleElements.Length < lowest)
+                lowest = v.possibleElements.Length;
+        }
+        List<NewVertex> lowestV = vertices.FindAll(v => v.possibleElements.Length == lowest);
+        NewVertex randomVertex = lowestV[Random.Range(0, lowestV.Count)];
+        creationList.Add(randomVertex);
+        RemoveVertex(randomVertex.id);
+        return randomVertex;
     }
     public void GraphGeneration(int height, int lenght)
     {
@@ -62,17 +112,17 @@ public class MapGeneration : MonoBehaviour
             {
                 matrixMap[i, j] = id;
 
-                NewVertex currentNewVertex = CreateNewVertex(id, mapElements);
+                NewVertex currentNewVertex = CreateNewVertex(id, mapElements, elementSize * i, elementSize * j);
 
                 if (i == 0)
-                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Up).constraints);
+                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Up).constraints);
                 else if (i == height - 1)
-                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Down).constraints);
+                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Down).constraints);
 
                 if (j == 0)
-                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Left).constraints);
+                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Left).constraints);
                 else if (j == lenght - 1)
-                    currentNewVertex.ModifyPossibleElements(mapRules.First(r => r.direction == Direction.Right).constraints);
+                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Right).constraints);
 
                 id++;
             }
@@ -90,9 +140,9 @@ public class MapGeneration : MonoBehaviour
                 CreateDoubleEdge(Direction.Down, matrixMap[i, j], matrixMap[i + 1, j], 1);
         }
     }
-    public NewVertex CreateNewVertex(int newVertex, Element[] possibleElements)
+    public NewVertex CreateNewVertex(int newVertex, Element[] possibleElements, float xPosition, float zPosition)
     {
-        NewVertex currentNewVertex = new NewVertex(newVertex, possibleElements);
+        NewVertex currentNewVertex = new NewVertex(newVertex, possibleElements, xPosition, zPosition);
         vertices.Add(currentNewVertex);
         return currentNewVertex;
     }

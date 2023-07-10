@@ -423,7 +423,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.53120357, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.553009, y: 0}
+  m_AnchoredPosition: {x: 1.5530396, y: 0}
   m_SizeDelta: {x: -2.105999, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &240014579
@@ -1403,6 +1403,9 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 18e696c347dacd746bc3701ca9d1a377, type: 2}
   adjacencyList_Text: {fileID: 1134878592}
   verticesInfos_Text: {fileID: 159177117}
+  stopUpdating: 0
+  currentElement: {fileID: 0}
+  elementSize: 3
 --- !u!1001 &681645254
 PrefabInstance:
   m_ObjectHideFlags: 0
