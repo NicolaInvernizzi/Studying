@@ -56,7 +56,7 @@ public class NewVertex
         {
             foreach (Edge edge in edges)
             {
-                Debug.Log($"V{id} E{element.prefab.name}{edge.id.ToString()}");
+                Debug.Log($"V{id} E{element.prefab.name}{edge.id}");
                 edge.adjacentVertex.ModifyPossibleElements(
                     element.rules.First(r => r.direction == edge.id).constraints);
             }

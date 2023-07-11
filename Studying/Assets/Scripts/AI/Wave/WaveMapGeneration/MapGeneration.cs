@@ -20,6 +20,7 @@ public class MapGeneration : MonoBehaviour
     [HideInInspector] public bool stopUpdating;
     [HideInInspector] public Element currentElement;
     List<NewVertex> creationList = new List<NewVertex>();
+    public int testing = 0;
 
     private void Start()
     {
@@ -29,7 +30,6 @@ public class MapGeneration : MonoBehaviour
 
         prevVertices.Push(vertices);
         /*currentVertex = LowestEntropy();*/ // - FIND A NEW VERTEX -
-        currentVertex = vertices.First(v => v.id == 0);
     }
     private void OnGUI()
     {
@@ -39,8 +39,6 @@ public class MapGeneration : MonoBehaviour
             UpdateMap();
         if (GUILayout.Button("PrintVerticesInfos"))
             PrintVerticesInfos();
-        if (GUILayout.Button("Continue"))
-            Testing();
         if (GUILayout.Button("CreateMap"))
             CreateMap();
         if (GUILayout.Button("Clear"))
@@ -67,6 +65,7 @@ public class MapGeneration : MonoBehaviour
     {
         // - START -
 
+        currentVertex = vertices.First(v => v.id == testing);
         currentVertex.WaveGeneration();
 
         while (vertices.Exists(v => v.inWave == true))
@@ -80,8 +79,9 @@ public class MapGeneration : MonoBehaviour
             }
 
             PrintVerticesInfos();
+            vertices.ForEach(v => v.newPossibles.Clear());
         }
-        currentVertex = vertices.First(v => v.id == 1);
+      
 
         //// - STOP -
         //if (stopUpdating)
@@ -102,10 +102,6 @@ public class MapGeneration : MonoBehaviour
         //    if (vertices.Exists(v => v.currentElement == null))
         //        currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
         //}
-    }
-    public void Testing()
-    {
-
     }
     public NewVertex LowestEntropy()
     {
