@@ -9,7 +9,8 @@ public class MapGeneration : MonoBehaviour
     public static MapGeneration instance;
     public int height;
     public int lenght;
-    public Element[] mapElements;
+    public float elementSize;
+    public List<Element> mapElements;
     public List<Rule> mapRules;
     public Text adjacencyList_Text;
     public Text verticesInfos_Text;
@@ -18,7 +19,6 @@ public class MapGeneration : MonoBehaviour
     NewVertex currentVertex;
     [HideInInspector] public bool stopUpdating;
     [HideInInspector] public Element currentElement;
-    public float elementSize;
     List<NewVertex> creationList = new List<NewVertex>();
 
     private void Start()
@@ -28,7 +28,8 @@ public class MapGeneration : MonoBehaviour
         PrintVerticesInfos();
 
         prevVertices.Push(vertices);
-        currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
+        /*currentVertex = LowestEntropy();*/ // - FIND A NEW VERTEX -
+        currentVertex = vertices.First(v => v.id == 0);
     }
     private void OnGUI()
     {
@@ -36,8 +37,14 @@ public class MapGeneration : MonoBehaviour
             PrintAdjacencyList();
         if (GUILayout.Button("UpdateMap"))
             UpdateMap();
+        if (GUILayout.Button("PrintVerticesInfos"))
+            PrintVerticesInfos();
+        if (GUILayout.Button("Continue"))
+            Testing();
         if (GUILayout.Button("CreateMap"))
             CreateMap();
+        if (GUILayout.Button("Clear"))
+            vertices.ForEach(v => v.newPossibles.Clear());
     }
     public void CreateMap()
     {
@@ -59,43 +66,57 @@ public class MapGeneration : MonoBehaviour
     public void UpdateMap()
     {
         // - START -
-        currentVertex.SetRandomElement();
 
-        // - STOP -
-        if (stopUpdating)
-        {
-            // remove from the wave - origin vertex the error element
-            currentVertex.RemovePossibleElement(currentElement);
-            stopUpdating = false;
+        currentVertex.WaveGeneration();
 
-            // turn back
-            vertices = prevVertices.Pop();
-        }
-        else // - CONTINUE -
+        while (vertices.Exists(v => v.inWave == true))
         {
-            vertices.ForEach(v => v.updated = false);
-            prevVertices.Push(vertices);
+            List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
+
+            foreach (NewVertex v in waveVertices)
+            {
+                if (v.inWave)
+                    v.UpdateAdjacent();
+            }
+
             PrintVerticesInfos();
-
-            if (vertices.Exists(v => v.currentElement == null))
-                currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
         }
+        currentVertex = vertices.First(v => v.id == 1);
 
-        //while (vertices.Exists(v => v.currentElement == null))
+        //// - STOP -
+        //if (stopUpdating)
         //{
+        //    // remove from the wave - origin vertex the error element
+        //    currentVertex.RemovePossibleElement(currentElement);
+        //    stopUpdating = false;
 
+        //    // turn back
+        //    vertices = prevVertices.Pop();
         //}
+        //else // - CONTINUE -
+        //{
+        //    vertices.ForEach(v => v.updated = false);
+        //    prevVertices.Push(vertices);
+        //    PrintVerticesInfos();
+
+        //    if (vertices.Exists(v => v.currentElement == null))
+        //        currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
+        //}
+    }
+    public void Testing()
+    {
+
     }
     public NewVertex LowestEntropy()
     {
-        int lowest = mapElements.Length;
+        int lowest = mapElements.Count;
 
         foreach(NewVertex v in vertices)
         {
-            if (v.possibleElements.Length < lowest)
-                lowest = v.possibleElements.Length;
+            if (v.possibleElements.Count < lowest)
+                lowest = v.possibleElements.Count;
         }
-        List<NewVertex> lowestV = vertices.FindAll(v => v.possibleElements.Length == lowest);
+        List<NewVertex> lowestV = vertices.FindAll(v => v.possibleElements.Count == lowest);
         NewVertex randomVertex = lowestV[Random.Range(0, lowestV.Count)];
         creationList.Add(randomVertex);
         RemoveVertex(randomVertex.id);
@@ -114,15 +135,15 @@ public class MapGeneration : MonoBehaviour
 
                 NewVertex currentNewVertex = CreateNewVertex(id, mapElements, elementSize * i, elementSize * j);
 
-                if (i == 0)
-                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Up).constraints);
-                else if (i == height - 1)
-                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Down).constraints);
+                //if (i == 0)
+                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Up).constraints);
+                //else if (i == height - 1)
+                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Down).constraints);
 
-                if (j == 0)
-                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Left).constraints);
-                else if (j == lenght - 1)
-                    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Right).constraints);
+                //if (j == 0)
+                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Left).constraints);
+                //else if (j == lenght - 1)
+                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Right).constraints);
 
                 id++;
             }
@@ -140,7 +161,7 @@ public class MapGeneration : MonoBehaviour
                 CreateDoubleEdge(Direction.Down, matrixMap[i, j], matrixMap[i + 1, j], 1);
         }
     }
-    public NewVertex CreateNewVertex(int newVertex, Element[] possibleElements, float xPosition, float zPosition)
+    public NewVertex CreateNewVertex(int newVertex, List<Element> possibleElements, float xPosition, float zPosition)
     {
         NewVertex currentNewVertex = new NewVertex(newVertex, possibleElements, xPosition, zPosition);
         vertices.Add(currentNewVertex);

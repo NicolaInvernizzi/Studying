@@ -8,12 +8,14 @@ public class NewVertex
     public int id;
     public List<Edge> edges;
     public Element currentElement;
-    public Element[] possibleElements;
+    public List<Element> possibleElements;
     public List<Element> triedElements;
     public float xPosition;
     public float zPosition;
     public bool updated;
-    public NewVertex(int id, Element[] possibleElements, float xPosition, float zPosition)
+    public bool inWave = false;
+    public List<Element> newPossibles = new List<Element>();
+    public NewVertex(int id, List<Element> possibleElements, float xPosition, float zPosition)
     {
         this.id = id;
         this.possibleElements = possibleElements;
@@ -27,34 +29,47 @@ public class NewVertex
         Debug.Log($"x:{xPosition} y:{zPosition}");
         MonoBehaviour.Instantiate(currentElement.prefab, new Vector3(xPosition, 0, zPosition), Quaternion.identity);
     }
-    public void RemovePossibleElement(Element element)
+    //public void RemovePossibleElement(Element element)
+    //{
+    //    possibleElements = possibleElements.Where(e => e != element).ToArray();
+    //}
+    //public void SetUpMapRules(Element[] toIntersect)
+    //{
+    //    possibleElements = possibleElements.Intersect(toIntersect).ToArray();
+    //    prevPossibleElements = possibleElements.Length;
+    //}
+    public void WaveGeneration()
     {
-        possibleElements = possibleElements.Where(e => e != element).ToArray();
-    }
-    public void SetUpMapRules(Element[] toIntersect)
-    {
-        possibleElements = possibleElements.Intersect(toIntersect).ToArray();
-    }
-    public void SetRandomElement()
-    {
-        currentElement = possibleElements[Random.Range(0, possibleElements.Length)];
-        possibleElements = possibleElements.Where(e => e == currentElement).ToArray();
-
+        Debug.Log(possibleElements.Count);
+        currentElement = possibleElements[Random.Range(0, possibleElements.Count)];
+        possibleElements = possibleElements.Where(e => e == currentElement).ToList();
         Debug.Log($"V{id}, E:{currentElement.name}");
+        /*
         MapGeneration.instance.currentElement = currentElement;
-
-        UpdateAdjacent();
+        */
+        inWave = true;
     }
-    void UpdateAdjacent()
+    public void UpdateAdjacent()
     {
-        foreach(Element element in possibleElements)
+        updated = true;
+        foreach (Element element in possibleElements)
         {
             foreach (Edge edge in edges)
-                edge.adjacentVertex.ModifyPossibleElements(element.rules.First(r => r.direction == edge.id).constraints);
+            {
+                Debug.Log($"V{id} E{element.prefab.name}{edge.id.ToString()}");
+                edge.adjacentVertex.ModifyPossibleElements(
+                    element.rules.First(r => r.direction == edge.id).constraints);
+            }
         }
+
+        inWave = false;
+
+        foreach (Edge edge in edges)
+            edge.adjacentVertex.ContinueWave();
     }
     void ModifyPossibleElements(Element[] toIntersect)
     {
+        /*
         if (MapGeneration.instance.stopUpdating || currentElement != null || updated)
             return;
 
@@ -63,14 +78,40 @@ public class NewVertex
             MapGeneration.instance.stopUpdating = true;
             return;
         }
+        */
 
-        // UPDATE this vertex infos
-        int prevPossibleElements = possibleElements.Length;
-        possibleElements = possibleElements.Intersect(toIntersect).ToArray();
-        updated = true;
-
-        if (prevPossibleElements != possibleElements.Length)
-            UpdateAdjacent();
+        if (!updated)
+        {
+            foreach(Element e in toIntersect)
+            {
+                if (!newPossibles.Exists(p => p == e))
+                    newPossibles.Add(e);
+            }
+        }
+    }
+    void ContinueWave()
+    {
+        if (!updated)
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append($"V{id}:");
+            str.Append("\nOld:");
+            foreach (Element e in possibleElements)
+            {
+                str.Append(e.prefab.name);
+            }
+            str.Append("\nNew:");
+            foreach (Element e in newPossibles)
+            {
+                str.Append(e.prefab.name);
+            }
+            Debug.Log(str);
+            if (newPossibles.Count < possibleElements.Count)
+            {
+                possibleElements = new List<Element>(newPossibles);
+                inWave = true;
+            }
+        }
     }
     public void AddEdge(Direction id, int adjacentNewVertex, int weight)
     {
@@ -95,7 +136,7 @@ public class NewVertex
         StringBuilder str = new StringBuilder();
 
         string txt = currentElement == null ? "X" : currentElement.name;
-        str.Append($"id [{this.id}] - Element [{txt}] - Possibles ");
+        str.Append($"id [{this.id}] - inW[{inWave}] - Element [{txt}] - Possibles ");
 
         if (possibleElements != null)
         {
