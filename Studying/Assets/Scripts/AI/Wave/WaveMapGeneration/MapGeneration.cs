@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,12 +15,10 @@ public class MapGeneration : MonoBehaviour
     public List<Rule> mapRules;
     public Text adjacencyList_Text;
     public Text verticesInfos_Text;
-    Stack<List<NewVertex>> prevVertices = new Stack<List<NewVertex>>();
     [HideInInspector] public List<NewVertex> vertices = new List<NewVertex>();
     NewVertex currentVertex;
     [HideInInspector] public bool stopUpdating;
     [HideInInspector] public Element currentElement;
-    List<NewVertex> creationList = new List<NewVertex>();
     public int testing = 0;
 
     private void Start()
@@ -27,9 +26,6 @@ public class MapGeneration : MonoBehaviour
         instance = this;
         GraphGeneration(height, lenght);
         PrintVerticesInfos();
-
-        prevVertices.Push(vertices);
-        /*currentVertex = LowestEntropy();*/ // - FIND A NEW VERTEX -
     }
     private void OnGUI()
     {
@@ -41,12 +37,12 @@ public class MapGeneration : MonoBehaviour
             PrintVerticesInfos();
         if (GUILayout.Button("CreateMap"))
             CreateMap();
-        if (GUILayout.Button("Clear"))
-            vertices.ForEach(v => v.newPossibles.Clear());
+        if (GUILayout.Button("Test"))
+            Test();
     }
     public void CreateMap()
     {
-        creationList.ForEach(v => v.InstantiatePrefab());
+        vertices.ForEach(v => v.InstantiatePrefab());
     }
     public void RemoveVertex(int vertex)
     {
@@ -65,23 +61,37 @@ public class MapGeneration : MonoBehaviour
     {
         // - START -
 
-        currentVertex = vertices.First(v => v.id == testing);
-        currentVertex.WaveGeneration();
+        //currentVertex = vertices.Find(i => i.id == testing);
 
-        while (vertices.Exists(v => v.inWave == true))
+
+        while (vertices.Exists(v => v.currentElement == null))
         {
-            List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
+            LowestEntropy();
+            currentVertex.WaveGeneration();
 
-            foreach (NewVertex v in waveVertices)
+            while (vertices.Exists(v => v.inWave == true))
             {
-                if (v.inWave)
-                    v.UpdateAdjacent();
-            }
+                List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
 
+                foreach (NewVertex v in waveVertices)
+                {
+                    if (v.inWave)
+                        v.UpdateAdjacent();
+                }
+                vertices.ForEach(v => v.newPossibles.Clear());
+            }
+            vertices.ForEach(v => v.updated = false);
+            foreach (NewVertex v in vertices)
+            {
+                if (v.currentElement == null && v.possibleElements.Count == 1)
+                {
+                    Debug.LogWarning($"V{v.id} {v.possibleElements[0]}");
+                    v.currentElement = v.possibleElements[0];
+                }
+            }
             PrintVerticesInfos();
-            vertices.ForEach(v => v.newPossibles.Clear());
         }
-      
+
 
         //// - STOP -
         //if (stopUpdating)
@@ -103,20 +113,24 @@ public class MapGeneration : MonoBehaviour
         //        currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
         //}
     }
-    public NewVertex LowestEntropy()
+    void Test()
+    {
+
+    }
+    void LowestEntropy()
     {
         int lowest = mapElements.Count;
 
         foreach(NewVertex v in vertices)
         {
-            if (v.possibleElements.Count < lowest)
+            if (v.currentElement == null && v.possibleElements.Count < lowest)
                 lowest = v.possibleElements.Count;
         }
+        Debug.Log("LLL" + lowest);
         List<NewVertex> lowestV = vertices.FindAll(v => v.possibleElements.Count == lowest);
+        Debug.Log("CCC" + lowestV.Count); 
         NewVertex randomVertex = lowestV[Random.Range(0, lowestV.Count)];
-        creationList.Add(randomVertex);
-        RemoveVertex(randomVertex.id);
-        return randomVertex;
+        currentVertex = randomVertex;
     }
     public void GraphGeneration(int height, int lenght)
     {
@@ -129,7 +143,7 @@ public class MapGeneration : MonoBehaviour
             {
                 matrixMap[i, j] = id;
 
-                NewVertex currentNewVertex = CreateNewVertex(id, mapElements, elementSize * i, elementSize * j);
+                NewVertex currentNewVertex = CreateNewVertex(id, mapElements, elementSize * j, elementSize * -i);
 
                 //if (i == 0)
                 //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Up).constraints);

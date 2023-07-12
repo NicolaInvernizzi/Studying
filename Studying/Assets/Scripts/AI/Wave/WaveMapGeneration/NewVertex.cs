@@ -27,7 +27,7 @@ public class NewVertex
     public void InstantiatePrefab()
     {
         Debug.Log($"x:{xPosition} y:{zPosition}");
-        MonoBehaviour.Instantiate(currentElement.prefab, new Vector3(xPosition, 0, zPosition), Quaternion.identity);
+        MonoBehaviour.Instantiate(currentElement.prefab, new Vector3(xPosition, 0, zPosition), currentElement.prefab.transform.rotation);
     }
     //public void RemovePossibleElement(Element element)
     //{
@@ -80,11 +80,11 @@ public class NewVertex
         }
         */
 
-        if (!updated)
+        if (!updated || currentElement == null)
         {
             foreach(Element e in toIntersect)
             {
-                if (!newPossibles.Exists(p => p == e))
+                if (possibleElements.Exists(p => p == e))
                     newPossibles.Add(e);
             }
         }
