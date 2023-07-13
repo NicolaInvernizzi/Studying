@@ -37,8 +37,10 @@ public class MapGeneration : MonoBehaviour
             PrintVerticesInfos();
         if (GUILayout.Button("CreateMap"))
             CreateMap();
-        if (GUILayout.Button("Test"))
-            Test();
+        if (GUILayout.Button("NewVertex"))
+            NNN();
+        if (GUILayout.Button("Wave"))
+            WWW();
     }
     public void CreateMap()
     {
@@ -57,13 +59,39 @@ public class MapGeneration : MonoBehaviour
         vertices.ForEach(v => str.Append(v.Print1(false)));
         adjacencyList_Text.text = str.ToString();
     }
+    public void NNN()
+    {
+        LowestEntropy();
+        currentVertex.WaveGeneration();
+    }
+    public void WWW()
+    {
+        List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
+
+        foreach (NewVertex v in waveVertices)
+        {
+            if (v.inWave)
+                v.UpdateAdjacent();
+        }
+        vertices.ForEach(v => v.newPossibles.Clear());
+
+        if (!vertices.Exists(v => v.inWave == true))
+        {
+            vertices.ForEach(v => v.updated = false);
+            foreach (NewVertex v in vertices)
+            {
+                if (v.currentElement == null && v.possibleElements.Count == 1)
+                {
+                    Debug.Log($"V{v.id} {v.possibleElements[0]}");
+                    v.currentElement = v.possibleElements[0];
+                }
+            }
+            Debug.LogWarning("EndWave");
+        }
+        PrintVerticesInfos();
+    }
     public void UpdateMap()
     {
-        // - START -
-
-        //currentVertex = vertices.Find(i => i.id == testing);
-
-
         while (vertices.Exists(v => v.currentElement == null))
         {
             LowestEntropy();
@@ -81,41 +109,8 @@ public class MapGeneration : MonoBehaviour
                 vertices.ForEach(v => v.newPossibles.Clear());
             }
             vertices.ForEach(v => v.updated = false);
-            foreach (NewVertex v in vertices)
-            {
-                if (v.currentElement == null && v.possibleElements.Count == 1)
-                {
-                    Debug.LogWarning($"V{v.id} {v.possibleElements[0]}");
-                    v.currentElement = v.possibleElements[0];
-                }
-            }
             PrintVerticesInfos();
         }
-
-
-        //// - STOP -
-        //if (stopUpdating)
-        //{
-        //    // remove from the wave - origin vertex the error element
-        //    currentVertex.RemovePossibleElement(currentElement);
-        //    stopUpdating = false;
-
-        //    // turn back
-        //    vertices = prevVertices.Pop();
-        //}
-        //else // - CONTINUE -
-        //{
-        //    vertices.ForEach(v => v.updated = false);
-        //    prevVertices.Push(vertices);
-        //    PrintVerticesInfos();
-
-        //    if (vertices.Exists(v => v.currentElement == null))
-        //        currentVertex = LowestEntropy(); // - FIND A NEW VERTEX -
-        //}
-    }
-    void Test()
-    {
-
     }
     void LowestEntropy()
     {
@@ -126,9 +121,7 @@ public class MapGeneration : MonoBehaviour
             if (v.currentElement == null && v.possibleElements.Count < lowest)
                 lowest = v.possibleElements.Count;
         }
-        Debug.Log("LLL" + lowest);
         List<NewVertex> lowestV = vertices.FindAll(v => v.possibleElements.Count == lowest);
-        Debug.Log("CCC" + lowestV.Count); 
         NewVertex randomVertex = lowestV[Random.Range(0, lowestV.Count)];
         currentVertex = randomVertex;
     }
@@ -143,18 +136,7 @@ public class MapGeneration : MonoBehaviour
             {
                 matrixMap[i, j] = id;
 
-                NewVertex currentNewVertex = CreateNewVertex(id, mapElements, elementSize * j, elementSize * -i);
-
-                //if (i == 0)
-                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Up).constraints);
-                //else if (i == height - 1)
-                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Down).constraints);
-
-                //if (j == 0)
-                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Left).constraints);
-                //else if (j == lenght - 1)
-                //    currentNewVertex.SetUpMapRules(mapRules.First(r => r.direction == Direction.Right).constraints);
-
+                CreateNewVertex(id, mapElements, elementSize * j - 50, elementSize * -i);
                 id++;
             }
         }
@@ -171,11 +153,9 @@ public class MapGeneration : MonoBehaviour
                 CreateDoubleEdge(Direction.Down, matrixMap[i, j], matrixMap[i + 1, j], 1);
         }
     }
-    public NewVertex CreateNewVertex(int newVertex, List<Element> possibleElements, float xPosition, float zPosition)
+    public void CreateNewVertex(int newVertex, List<Element> possibleElements, float xPosition, float zPosition)
     {
-        NewVertex currentNewVertex = new NewVertex(newVertex, possibleElements, xPosition, zPosition);
-        vertices.Add(currentNewVertex);
-        return currentNewVertex;
+        vertices.Add(new NewVertex(newVertex, possibleElements, xPosition, zPosition));
     }
     public void CreateDoubleEdge(Direction id, int newVertex1, int newVertex2, int weight)
     {

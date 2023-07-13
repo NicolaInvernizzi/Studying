@@ -26,7 +26,6 @@ public class NewVertex
 
     public void InstantiatePrefab()
     {
-        Debug.Log($"x:{xPosition} y:{zPosition}");
         MonoBehaviour.Instantiate(currentElement.prefab, new Vector3(xPosition, 0, zPosition), currentElement.prefab.transform.rotation);
     }
     //public void RemovePossibleElement(Element element)
@@ -40,13 +39,9 @@ public class NewVertex
     //}
     public void WaveGeneration()
     {
-        Debug.Log(possibleElements.Count);
         currentElement = possibleElements[Random.Range(0, possibleElements.Count)];
         possibleElements = possibleElements.Where(e => e == currentElement).ToList();
         Debug.Log($"V{id}, E:{currentElement.name}");
-        /*
-        MapGeneration.instance.currentElement = currentElement;
-        */
         inWave = true;
     }
     public void UpdateAdjacent()
@@ -69,29 +64,18 @@ public class NewVertex
     }
     void ModifyPossibleElements(Element[] toIntersect)
     {
-        /*
-        if (MapGeneration.instance.stopUpdating || currentElement != null || updated)
-            return;
-
-        if (possibleElements.Length == 0)
-        {
-            MapGeneration.instance.stopUpdating = true;
-            return;
-        }
-        */
-
-        if (!updated || currentElement == null)
+        if (!updated && currentElement == null)
         {
             foreach(Element e in toIntersect)
             {
-                if (possibleElements.Exists(p => p == e))
+                if (possibleElements.Exists(p => p == e) && !newPossibles.Exists(n => n == e))
                     newPossibles.Add(e);
             }
         }
     }
     void ContinueWave()
     {
-        if (!updated)
+        if (!updated && currentElement == null)
         {
             StringBuilder str = new StringBuilder();
             str.Append($"V{id}:");
@@ -136,7 +120,7 @@ public class NewVertex
         StringBuilder str = new StringBuilder();
 
         string txt = currentElement == null ? "X" : currentElement.name;
-        str.Append($"id [{this.id}] - inW[{inWave}] - Element [{txt}] - Possibles ");
+        str.Append($"V[{this.id}] - U[{updated}]- W[{inWave}] - E[{txt}] - P");
 
         if (possibleElements != null)
         {
