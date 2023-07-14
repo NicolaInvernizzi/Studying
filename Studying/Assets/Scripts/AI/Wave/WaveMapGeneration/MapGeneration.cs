@@ -1,12 +1,16 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class MapGeneration : MonoBehaviour
 {
+    public Transform mapPosition;
+    public float generationSpeed;
     public static MapGeneration instance;
     public int height;
     public int lenght;
@@ -17,12 +21,12 @@ public class MapGeneration : MonoBehaviour
     public Text verticesInfos_Text;
     [HideInInspector] public List<NewVertex> vertices = new List<NewVertex>();
     NewVertex currentVertex;
-    [HideInInspector] public Stack<List<NewVertex>> vStack = new Stack<List<NewVertex>>();
-    [HideInInspector] public Stack<NewVertex> waveGenerators = new Stack<NewVertex>();
-    public bool stop;
-    public bool auto;
-    public Element te;
-    public int tv;
+    bool stopLoop;
+    int generationTry;
+    Coroutine mainLoop;
+    Coroutine updateLoop;
+    Coroutine waveLoop;
+
     private void Start()
     {
         instance = this;
@@ -31,116 +35,86 @@ public class MapGeneration : MonoBehaviour
     }
     private void OnGUI()
     {
-        if (GUILayout.Button("AdjacencyList"))
-            PrintAdjacencyList();
         if (GUILayout.Button("UpdateMap"))
-            UpdateMap();
-        if (GUILayout.Button("PrintVerticesInfos"))
-            PrintVerticesInfos();
-        if (GUILayout.Button("CreateMap"))
-            CreateMap();
-        if (GUILayout.Button("NewVertex"))
-            NNN();
-        if (GUILayout.Button("Wave"))
-            WWW();
+        {
+            if (mainLoop == null)
+                mainLoop = StartCoroutine(MainLoop());
+        }
+    }
+    void ResetGraph()
+    {
+        vertices.Clear();
+        currentVertex = null;
+        GraphGeneration(height, lenght);
+        PrintVerticesInfos();
     }
     void CreateMap()
     {
         vertices.ForEach(v => v.InstantiatePrefab());
     }
-    void RemoveVertex(int vertex)
+    IEnumerator MainLoop()
     {
-        vertices.Remove(vertices.Find(i => i.id == vertex));
-        vertices.ForEach(i => i.edges.Remove(i.edges.Find(v => v.adjacentVertex.id == vertex)));
-    }
-    void PrintAdjacencyList()
-    {
-        Sort(vertices);
-        StringBuilder str = new StringBuilder();
-        str.AppendLine("Adjacency List:");
-        vertices.ForEach(v => str.Append(v.Print1(false)));
-        adjacencyList_Text.text = str.ToString();
-    }
-    public void Push()
-    {
-        vStack.Push(new List<NewVertex>(vertices));
-        waveGenerators.Push(new NewVertex(currentVertex));
-    }
-    void NNN()
-    {
-        if (!stop)
+        stopLoop = false;
+        generationTry = 1;
+        do
         {
-            if (auto)
+            yield return new WaitForSeconds(1);
+            updateLoop = StartCoroutine(UpdateMap());
+        } while (!stopLoop);
+        Debug.Log($"Map Created in {generationTry} {(generationTry == 1?"attempt":"attempts")}");
+        mainLoop = null;
+    }
+    IEnumerator UpdateMap()
+    {
+        while (vertices.Exists(v => v.currentElement == null))
+        {
+            if (waveLoop == null)
+            {
                 LowestEntropy();
-            else
-                currentVertex = vertices.Find(v => v.id == tv);
+                if (currentVertex.WaveGeneration())
+                {
+                    waveLoop = StartCoroutine(Wave());
+                }
+                else
+                {
+                    ResetGraph();
+                    generationTry++;
+                    Debug.LogWarning("Error during generation");
+                    foreach (Transform child in mapPosition)
+                        Destroy(child.gameObject);
+                    yield break;
+                }
+            }
+            yield return new WaitForSeconds(generationSpeed);
         }
-        else
-            stop = false;
-        currentVertex.WaveGeneration();
+        stopLoop = true;
+        //CreateMap();
+        updateLoop = null;
     }
-    void WWW()
+    IEnumerator Wave()
     {
-        List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
-
-        foreach (NewVertex v in waveVertices)
+        while (vertices.Exists(v => v.inWave == true))
         {
-            if (stop)
-                break;
-            else
+            List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
+
+            foreach (NewVertex v in waveVertices)
             {
                 if (v.inWave)
                     v.UpdateAdjacent();
             }
-        }
-        if (stop)
-        {
-            Debug.Log($"V{currentVertex.id} with E{currentVertex.currentElement} generated an empty state");
-            bool turnBack = true;
-            do
-            {
-                vertices = vStack.Pop();
-                currentVertex = waveGenerators.Pop();
-                Debug.Log($"Try back to {currentVertex.id}");
-                Debug.Log($"with current E { currentVertex.currentElement}");
-                turnBack = currentVertex.RemovePossibleElement(currentVertex.currentElement);
-            } while (turnBack);
-            Debug.Log($"Back to {currentVertex}");
-        }
-        else
-        {
             vertices.ForEach(v => v.newPossibles.Clear());
-
-            if (!vertices.Exists(v => v.inWave == true))
-            {
-                vertices.ForEach(v => v.updated = false);
-                Debug.LogWarning("EndWave");
-            }
+            yield return null;
         }
-
+        vertices.ForEach(v => v.updated = false);
         PrintVerticesInfos();
+        waveLoop = null;
     }
-    void UpdateMap()
+    [ContextMenu("Test")]
+    public void Test()
     {
-        while (vertices.Exists(v => v.currentElement == null))
-        {
-            LowestEntropy();
-            currentVertex.WaveGeneration();
-
-            while (vertices.Exists(v => v.inWave == true))
-            {
-                List<NewVertex> waveVertices = vertices.Where(v => v.inWave == true).ToList();
-
-                foreach (NewVertex v in waveVertices)
-                {
-                    if (v.inWave)
-                        v.UpdateAdjacent();
-                }
-                vertices.ForEach(v => v.newPossibles.Clear());
-            }
-            vertices.ForEach(v => v.updated = false);
-            PrintVerticesInfos();
-        }
+        Debug.Log(updateLoop == null);
+        Debug.Log(mainLoop == null);
+        Debug.Log(waveLoop == null);
     }
     void LowestEntropy()
     {
@@ -166,7 +140,7 @@ public class MapGeneration : MonoBehaviour
             {
                 matrixMap[i, j] = id;
 
-                CreateNewVertex(id, mapElements, elementSize * j - 50, elementSize * -i);
+                vertices.Add(new NewVertex(id, mapElements, elementSize * j, elementSize * -i));
                 id++;
             }
         }
@@ -194,10 +168,6 @@ public class MapGeneration : MonoBehaviour
                     v.SetUpMapRules(r.constraints);
             }
         }
-    }
-    void CreateNewVertex(int newVertex, List<Element> possibleElements, float xPosition, float zPosition)
-    {
-        vertices.Add(new NewVertex(newVertex, possibleElements, xPosition, zPosition));
     }
     void CreateDoubleEdge(Direction id, int newVertex1, int newVertex2, int weight)
     {
@@ -241,5 +211,18 @@ public class MapGeneration : MonoBehaviour
             toSort[toSort.IndexOf(min)] = swap;
             toSort[j] = min;
         }
+    }
+    void PrintAdjacencyList()
+    {
+        Sort(vertices);
+        StringBuilder str = new StringBuilder();
+        str.AppendLine("Adjacency List:");
+        vertices.ForEach(v => str.Append(v.Print1(false)));
+        adjacencyList_Text.text = str.ToString();
+    }
+    public void RemoveVertex(NewVertex vertex)
+    {
+        vertices.Remove(vertices.Find(i => i == vertex));
+        vertices.ForEach(i => i.edges.Remove(i.edges.Find(v => v.adjacentVertex == vertex)));
     }
 }
