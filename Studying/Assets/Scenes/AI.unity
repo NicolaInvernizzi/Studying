@@ -1371,8 +1371,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 484da79143c355b4fbd0859f94677bbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  height: 10
-  lenght: 10
+  height: 4
+  lenght: 4
   elementSize: 3
   mapElements:
   - {fileID: 11400000, guid: 62a01e68b1420454f9e2d5a3eb66e79d, type: 2}
@@ -1404,9 +1404,10 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 18e696c347dacd746bc3701ca9d1a377, type: 2}
   adjacencyList_Text: {fileID: 1134878592}
   verticesInfos_Text: {fileID: 159177117}
-  stopUpdating: 0
-  currentElement: {fileID: 0}
-  testing: 0
+  stop: 0
+  auto: 1
+  te: {fileID: 11400000, guid: 5473c1fe5628e354887b30871736e265, type: 2}
+  tv: 0
 --- !u!1001 &681645254
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2077,6 +2078,7 @@ GameObject:
   - component: {fileID: 1353183898}
   - component: {fileID: 1353183897}
   - component: {fileID: 1353183896}
+  - component: {fileID: 1353183899}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2150,6 +2152,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 90}
+--- !u!114 &1353183899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353183895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 902af5a3612571640ba771734b5fe12d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1401489658
 GameObject:
   m_ObjectHideFlags: 0
