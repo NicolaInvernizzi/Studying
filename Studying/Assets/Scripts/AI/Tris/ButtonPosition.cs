@@ -13,11 +13,10 @@ public class ButtonPosition : MonoBehaviour
     }
     private void Start()
     {
-        GameLogic.buttonList.Add(button);
+        GameLogic.buttons.Add(button);
     }
     public void RemoveAndDisable()
     {
         button.interactable = false;
-        GameLogic.buttonList.Remove(button);
     }
 }

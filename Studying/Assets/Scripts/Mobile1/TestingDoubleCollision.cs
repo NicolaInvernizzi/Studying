@@ -85,7 +85,9 @@ public class TestingDoubleCollision : MonoBehaviour
     }
     void ResetTransform()
     {
-        DestroyCoroutine(coroutine);
+        if (coroutine != null)
+            DestroyCoroutine(coroutine);
+
         transform.position = startingPosition;
         transform.rotation = startingRotation;
     }

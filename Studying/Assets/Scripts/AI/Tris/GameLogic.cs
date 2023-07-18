@@ -2,36 +2,41 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using System.Collections;
 
 public class GameLogic : MonoBehaviour
 {
-    public static List<Button> buttonList = new List<Button>();
-    public Text roundText;
-    public string simbolA;
-    public string simbolB; 
-    Round currentRound;
-    enum Round
-    {
-        A, 
-        B
-    }
-    string currentSimbol;
+    public static List<Button> buttons = new List<Button>();
+
+    [SerializeField]
+    Text roundText;
+
+    [SerializeField]
+    string simbolA;
+
+    [SerializeField]
+    string simbolB;
+
     string[,] gameBoard = new string[3, 3];
-    int winCounter = 0;
+    Round currentRound;
+    string currentSimbol;
+    int winCounter;
     bool gameOver;
-    private enum Check
+    enum Check
     {
         Raw,
         Column,
         DiagonalSx,
         DiagonalDx,
     }
-
-    private void Start()
+    enum Round
     {
-        currentRound = (Round)Random.Range(0, 2);
-        ChangeRound();
+        A,
+        B
+    }
+
+    void Start()
+    {
+        Restart();
     }
     public void Click()
     {
@@ -42,21 +47,20 @@ public class GameLogic : MonoBehaviour
         gameBoard[buttonScript.raw, buttonScript.column] = currentSimbol;
         GameOver();
     }
-    void GameOver()
+    public void Restart()
     {
-        CheckRawColumn(Check.Raw);
-        CheckRawColumn(Check.Column);
-        CheckDiagonal(Check.DiagonalSx);
-        CheckDiagonal(Check.DiagonalDx);
-
-        if (!gameOver && buttonList.Count == 0)
+        foreach(Button b in buttons)
         {
-            roundText.text = "Draw";
-            DisableGame();
+            print(b.name);
+            b.GetComponentInChildren<Text>().text = "";
+            b.interactable = true;
         }
 
-        if (!gameOver)
-            ChangeRound();
+        gameOver = false;
+        winCounter = 0;
+        gameBoard = new string[3, 3];
+        currentRound = (Round)Random.Range(0, 2);
+        ChangeRound();
     }
     void ChangeRound()
     {
@@ -73,6 +77,27 @@ public class GameLogic : MonoBehaviour
                 roundText.text = $"{simbolA} is playing...";
                 break;
         }
+    }
+    void DisableGame()
+    {
+        buttons.ForEach(b => b.GetComponent<ButtonPosition>().button.interactable = false);
+        gameOver = true;
+    }
+    void GameOver()
+    {
+        CheckRawColumn(Check.Raw);
+        CheckRawColumn(Check.Column);
+        CheckDiagonal(Check.DiagonalSx);
+        CheckDiagonal(Check.DiagonalDx);
+
+        if (!gameOver && !buttons.Exists(b => b.interactable))
+        {
+            roundText.text = "Draw";
+            DisableGame();
+        }
+
+        if (!gameOver)
+            ChangeRound();
     }
     void CheckRawColumn(Check check)
     {
@@ -136,11 +161,6 @@ public class GameLogic : MonoBehaviour
             if (gameBoard[value1, value2] != null && gameBoard[value1, value2] == gameBoard[value1 + 1, value2 + columnSign])
                 GameEnd(gameBoard[value1, value2]);
         }
-    }
-    void DisableGame()
-    {
-        buttonList.ForEach(b => b.GetComponent<ButtonPosition>().button.interactable = false);
-        gameOver = true;
     }
     void GameEnd(string value)
     {
