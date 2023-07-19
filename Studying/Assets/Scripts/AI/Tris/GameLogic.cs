@@ -2,10 +2,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Collections;
 
 public class GameLogic : MonoBehaviour
 {
-    public static List<Button> buttons = new List<Button>();
+    public static List<ButtonPosition> buttons = new List<ButtonPosition>();
 
     [SerializeField]
     Text roundText;
@@ -16,18 +17,11 @@ public class GameLogic : MonoBehaviour
     [SerializeField]
     string simbolB;
 
-    string[,] gameBoard = new string[3, 3];
+    string[,] board = new string[3, 3];
+
     Round currentRound;
     string currentSimbol;
-    int winCounter;
-    bool gameOver;
-    enum Check
-    {
-        Raw,
-        Column,
-        DiagonalSx,
-        DiagonalDx,
-    }
+    Coroutine ai = null;
     enum Round
     {
         A,
@@ -38,27 +32,26 @@ public class GameLogic : MonoBehaviour
     {
         Restart();
     }
+    private void Update()
+    {
+        print(ai == null);
+    }
     public void Click()
     {
-        GameObject gameObject = EventSystem.current.currentSelectedGameObject.gameObject;
-        gameObject.GetComponentInChildren<Text>().text = currentSimbol;
-        ButtonPosition buttonScript = gameObject.GetComponent<ButtonPosition>();
-        buttonScript.RemoveAndDisable();
-        gameBoard[buttonScript.raw, buttonScript.column] = currentSimbol;
-        GameOver();
+        ButtonPosition buttonScript = EventSystem.current.currentSelectedGameObject.gameObject.GetComponent<ButtonPosition>();
+        buttonScript.SetSimbol(currentSimbol, false);
+        board[buttonScript.raw, buttonScript.column] = currentSimbol;
+        VerifyBoard();
     }
     public void Restart()
     {
-        foreach(Button b in buttons)
+        foreach(ButtonPosition b in buttons)
         {
-            print(b.name);
-            b.GetComponentInChildren<Text>().text = "";
-            b.interactable = true;
+            b.SetSimbol("", true);
+            b.Interactable(true);
         }
 
-        gameOver = false;
-        winCounter = 0;
-        gameBoard = new string[3, 3];
+        board = new string[3, 3];
         currentRound = (Round)Random.Range(0, 2);
         ChangeRound();
     }
@@ -75,103 +68,143 @@ public class GameLogic : MonoBehaviour
                 currentRound = Round.A;
                 currentSimbol = simbolA;
                 roundText.text = $"{simbolA} is playing...";
+                ai = StartCoroutine(AI());
                 break;
         }
     }
-    void DisableGame()
+    void VerifyBoard()
     {
-        buttons.ForEach(b => b.GetComponent<ButtonPosition>().button.interactable = false);
-        gameOver = true;
-    }
-    void GameOver()
-    {
-        CheckRawColumn(Check.Raw);
-        CheckRawColumn(Check.Column);
-        CheckDiagonal(Check.DiagonalSx);
-        CheckDiagonal(Check.DiagonalDx);
+        string status = Winner(board);
 
-        if (!gameOver && !buttons.Exists(b => b.interactable))
+        if (status == simbolA)
         {
-            roundText.text = "Draw";
-            DisableGame();
+            roundText.text = $"{status} wins";
+            buttons.ForEach(b => b.Interactable(false));
+            return;
         }
 
-        if (!gameOver)
+        else if (status == simbolB)
+        {
+            roundText.text = $"{status} wins";
+            buttons.ForEach(b => b.Interactable(false));
+            return;
+        }
+
+        else if (status == "Draw")
+        {
+            roundText.text = status;
+            return;
+        }
+
+        else
             ChangeRound();
     }
-    void CheckRawColumn(Check check)
+
+    IEnumerator AI()
     {
-        int dimension1 = 0;
-        int dimension2 = 0;
+        yield return new WaitForSeconds(1);
+        int bestScore = -10;
+        int[] bestMove = new int[2];
 
-        if (check == Check.Raw)
+        for(int i = 0; i < 3; i++)
         {
-            dimension1 = 0;
-            dimension2 = 1;
-        }
-        else if (check == Check.Column)
-        {
-            dimension1 = 1;
-            dimension2 = 0;
+            for(int j = 0; j < 3; j++)
+            {
+                if (board[i, j] == null)
+                {
+                    board[i, j] = currentSimbol;
+                    int score = MinMax(board);
+                    board[i, j] = null;
+                    
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestMove = new int[] { i, j };
+                    }
+                }
+            }
         }
 
-        for (int value1 = 0; value1 < gameBoard.GetLength(dimension1); value1++)
+        board[bestMove[0], bestMove[1]] = currentSimbol;
+        
+        foreach (ButtonPosition b in buttons)
         {
-            for (int value2 = 0; value2 < gameBoard.GetLength(dimension2) - 1; value2++)
-                CheckWin(check, value1, value2, 0);
-            winCounter = 0;
+            if (b.CheckRawColumn(bestMove[0], bestMove[1]))
+                b.SetSimbol(currentSimbol, false);
         }
+        print($"Ai moved in: {bestMove[0]} {bestMove[1]}");
+        VerifyBoard();
+        ai = null;
     }
-    void CheckDiagonal(Check check)
+
+    // return state score
+    int MinMax(string[,] state)
     {
+        return 0;
+    }
+
+    string Winner(string[,] stateToCheck)
+    {
+        int c = 0;
+
+        // check raw
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (stateToCheck[i, j] != null && stateToCheck[i, j] == stateToCheck[i, j + 1])
+                    c++;
+                if (c == 2)
+                    return stateToCheck[i, j];
+            }
+            c = 0;
+        }
+
+        // check column
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                if (stateToCheck[j, i] != null && stateToCheck[j, i] == stateToCheck[j + 1, i])
+                    c++;
+                if (c == 2)
+                    return stateToCheck[i, j];
+            }
+            c = 0;
+        }
+
+        // check diagonal1
+        for (int i = 0; i < 2; i++)
+        {
+            if (stateToCheck[i, i] != null && stateToCheck[i, i] == stateToCheck[i + 1, i + 1])
+                c++;
+            if (c == 2)
+                return stateToCheck[i, i];
+        }
+
+        c = 0;
+
+        // check diagonal2
         int column = 0;
-        int columnSign = 0;
-        if (check == Check.DiagonalSx)
+        for (int i = 2; i > 0; i--)
         {
-            column = 0;
-            columnSign = 1;
-        }
-        else if (check == Check.DiagonalDx)
-        {
-            column = 2;
-            columnSign = -1;
+            if (stateToCheck[i, column] != null && stateToCheck[i, column] == stateToCheck[i - 1, column + 1])
+                c++;
+            if (c == 2)
+                return stateToCheck[i, i];
+            column++;
         }
 
-        for (int raw = 0; raw < 2; raw++)
+        // check draw
+        for (int i = 0; i < 3; i++)
         {
-            CheckWin(check, raw, column, columnSign);
-            column += columnSign;
+            for (int j = 0; j < 3; j++)
+            {
+                if (board[i, j] == null)
+                    return "Continue";
+            }
         }
-        winCounter = 0;
-    }
-    void CheckWin(Check check, int value1, int value2, int columnSign)
-    {
-        if (check == Check.Raw)
-        {
-            if (gameBoard[value1, value2] != null && gameBoard[value1, value2] == gameBoard[value1, value2 + 1])
-                GameEnd(gameBoard[value1, value2]);
-        }
-        else if (check == Check.Column)
-        {
-            if (gameBoard[value2, value1] != null && gameBoard[value2, value1] == gameBoard[value2 + 1, value1])
-                GameEnd(gameBoard[value2, value1]);
-        }
-        else if (check == Check.DiagonalSx || check == Check.DiagonalDx)
-        {
-            if (gameBoard[value1, value2] != null && gameBoard[value1, value2] == gameBoard[value1 + 1, value2 + columnSign])
-                GameEnd(gameBoard[value1, value2]);
-        }
-    }
-    void GameEnd(string value)
-    {
-        winCounter++;
-        if (winCounter == 2)
-        {
-            if (value == simbolA)
-                roundText.text = $"{simbolA} wins";
-            else
-                roundText.text = $"{simbolB} wins";
-            DisableGame();
-        }
+
+        return "Draw";
     }
 }
