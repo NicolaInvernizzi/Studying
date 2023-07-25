@@ -542,10 +542,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6185681728976483837}
   - component: {fileID: 3181419469321368907}
-  - component: {fileID: 5328057688848614835}
+  - component: {fileID: -3546573587620908802}
   m_Layer: 7
   m_Name: Boid
-  m_TagString: Untagged
+  m_TagString: Boid
   m_Icon: {fileID: 5721338939258241955, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -583,7 +583,7 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.8
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5328057688848614835
+--- !u!114 &-3546573587620908802
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -592,18 +592,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 7337674331769759492}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f407e520a7efbbb4c80f858c910a4408, type: 3}
+  m_Script: {fileID: 11500000, guid: b93e4778fc08590479e19d3e90c84254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRange: 2
-  detectionDistance: 5
-  minRotationSpeed: 1
-  maxRotationSpeed: 5
-  minMovementSpeed: 0
-  maxMovementSpeed: 1
-  detectablesMask:
+  speed: 2
+  coesionRange: 2
+  separationRange: 2
+  obstacleRange: 2
+  repulsion: 30
+  obstacleMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 64
 --- !u!1 &8654155238742580802
 GameObject:
   m_ObjectHideFlags: 0

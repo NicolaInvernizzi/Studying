@@ -110,20 +110,7 @@ public class Boid : MonoBehaviour
     }
     private void Separation()
     {
-        if (Physics.SphereCast(transform.position, detectionRange, transform.forward, out RaycastHit hitInfo, detectionRange, detectablesMask))
-        {
-            sphereColor = Color.green;
-            aiDirection = transform.position - hitInfo.point;
 
-            // modify rotation speed
-            float currentRotationSpeed = Remap(0.0f, detectionRange, maxRotationSpeed, minRotationSpeed, aiDirection.magnitude);
-            Quaternion finalRotation = Quaternion.LookRotation(aiDirection.normalized, transform.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation, Time.deltaTime * currentRotationSpeed);
-        }
-        else
-        {
-            sphereColor = Color.red;
-        }
     }
 
     private float Remap(float min_A, float max_A, float min_B, float max_B, float A)

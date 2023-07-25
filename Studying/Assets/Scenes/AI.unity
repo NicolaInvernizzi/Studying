@@ -1693,7 +1693,7 @@ GameObject:
   - component: {fileID: 776312553}
   - component: {fileID: 776312552}
   - component: {fileID: 776312551}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Cube (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1991,7 +1991,7 @@ GameObject:
   - component: {fileID: 1056606304}
   - component: {fileID: 1056606303}
   - component: {fileID: 1056606302}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2081,6 +2081,37 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8492208787305950070, guid: 0aac86a77e260bd4cbaa9ca4e3caff08, type: 3}
   m_PrefabInstance: {fileID: 534978226}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1104516771
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1104516772}
+  m_Layer: 0
+  m_Name: Debug
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1104516772
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1104516771}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 13.1, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1105714900
 GameObject:
   m_ObjectHideFlags: 0
@@ -2699,7 +2730,7 @@ GameObject:
   - component: {fileID: 1366229012}
   - component: {fileID: 1366229011}
   - component: {fileID: 1366229010}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3383,8 +3414,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boid: {fileID: 7337674331769759492, guid: c12809df86c779140a4cf12167c6931d, type: 3}
-  randomStartRotation: 1
-  fixedStartRotation: 0
 --- !u!4 &1737199398
 Transform:
   m_ObjectHideFlags: 0
@@ -3417,7 +3446,7 @@ GameObject:
   - component: {fileID: 1831357248}
   - component: {fileID: 1831357247}
   - component: {fileID: 1831357246}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Cube (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
