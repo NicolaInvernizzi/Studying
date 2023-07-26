@@ -595,14 +595,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b93e4778fc08590479e19d3e90c84254, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 10
   speed: 2
   coesionRange: 2
   separationRange: 2
   obstacleRange: 2
-  repulsion: 30
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+  repulsion: 30
 --- !u!1 &8654155238742580802
 GameObject:
   m_ObjectHideFlags: 0
