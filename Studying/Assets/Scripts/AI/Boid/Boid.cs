@@ -3,134 +3,107 @@ using UnityEngine;
 
 public class Boid : MonoBehaviour
 {
-    [SerializeField, Range(0.0f, 10.0f)]
-    private float detectionRange = 2.0f;
+    [SerializeField] float maxSpeed = 2f;
+    [SerializeField] float speed = 2f;
+    [SerializeField] float coesionRange = 2f;
+    [SerializeField] float separationRange = 2f;
+    [SerializeField] float obstacleRange = 2f;
+    [SerializeField] LayerMask obstacleMask;
+    public float repulsion = 30f;
+    Vector3 velocity;
+    Vector3 direction;
 
-    [SerializeField, Range(0.0f, 5.0f)]
-    private float detectionDistance = 1.0f;
-
-    [SerializeField, Range(0.0f, 10.0f)]
-    private float minRotationSpeed = 1.0f;
-
-    [SerializeField, Range(0.0f, 10.0f)]
-    private float maxRotationSpeed = 5.0f;
-
-    [SerializeField, Range(0.0f, 10.0f)]
-    private float minMovementSpeed = 0.0f;
-
-    [SerializeField, Range(0.0f, 10.0f)]
-    private float maxMovementSpeed = 5.0f;
-
-    [SerializeField]
-    LayerMask detectablesMask;
-
-    Collider[] colliders;
-    float currentMovementSpeed;
-    Color sphereColor;
-    Collider thisCollider;
-    Vector3 aiDirection = Vector3.zero;
-    Vector3 closestPoint = Vector3.zero;
-
-    private void Awake()
+    void Start()
     {
-        thisCollider = GetComponent<Collider>();
+        direction = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
     }
-    private void Start()
+    void Update()
     {
-        currentMovementSpeed = maxMovementSpeed;
+        direction += Coesion();
+        direction += Separation();
+        direction += Align();
+        direction += AvoidObstacles();
+        velocity = direction * speed;
+
+        velocity = velocity.normalized * Mathf.Min(velocity.magnitude, maxSpeed);
+        velocity.y = 0;
+
+        transform.LookAt(transform.position + velocity);
+        transform.position += velocity * Time.deltaTime;
     }
-    private void Update()
+
+    Vector3 AvoidObstacles()
     {
-        colliders = Physics.OverlapSphere(transform.position, detectionRange, detectablesMask);
+        Vector3 totRepulsion = Vector3.zero;
 
-        colliders = colliders.Where(col => col != thisCollider).ToArray();
+        Collider[] obstacles = Physics.OverlapSphere(transform.position, obstacleRange, obstacleMask);
+        if (obstacles.Length == 0f)
+            return totRepulsion;
 
-        foreach (Collider col in colliders)
+        foreach(Collider obstacle in obstacles)
         {
-            colliders = colliders.Where(col => Vector3.Angle(
-                transform.forward, col.ClosestPoint(transform.position) - transform.position) <= 360.0f).ToArray();
+            totRepulsion += transform.position - obstacle.ClosestPoint(transform.position);
         }
 
-        if (colliders.Length > 0)
+        return totRepulsion.normalized * repulsion;
+    }
+    Vector3 Coesion()
+    {
+        Vector3 totCoesion = Vector3.zero;
+
+        GameObject[] neighbors = GameObject.FindGameObjectsWithTag("Boid").Where(
+            n => n != gameObject && Vector3.Distance(n.transform.position, transform.position) <= coesionRange).ToArray();
+
+        if (neighbors.Length <= 0f)
+            return totCoesion;
+
+        foreach (GameObject neighbor in neighbors)
         {
-            sphereColor = Color.green;
-            float minDistance = Mathf.Infinity;
-            Vector3 minPosition = Vector3.zero;
-            Collider closestCol = colliders[0];
-
-            foreach (Collider col in colliders)
-            {
-                float distance = Vector3.Distance(transform.position, col.ClosestPoint(transform.position));
-                if (distance <= minDistance)
-                {
-                    minDistance = distance;
-                    minPosition = col.transform.position;
-                    closestCol = col;
-                }
-            }
-
-            closestPoint = closestCol.ClosestPoint(transform.position);
-            aiDirection = (transform.position - closestPoint).normalized;
-
-            // modify movement speed
-            currentMovementSpeed = Remap(0.0f, detectionRange, minMovementSpeed, maxMovementSpeed, minDistance);
-
-            // modify rotation speed
-            float currentRotationSpeed = Remap(0.0f, detectionRange, maxRotationSpeed, minRotationSpeed, minDistance);
-            Quaternion finalRotation = Quaternion.LookRotation(aiDirection, transform.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, finalRotation, Time.deltaTime * currentRotationSpeed);
-
+            totCoesion += neighbor.transform.position;
         }
-        else
+        totCoesion /= neighbors.Length;
+
+        return totCoesion.normalized;
+    }
+    Vector3 Separation()
+    {
+        Vector3 totSeparation = Vector3.zero;
+
+        GameObject[] neighbors = GameObject.FindGameObjectsWithTag("Boid").Where(
+            n => n != gameObject && Vector3.Distance(n.transform.position, transform.position) <= separationRange).ToArray();
+
+        if (neighbors.Length == 0f)
+            return totSeparation;
+
+        foreach (GameObject neighbor in neighbors)
         {
-            aiDirection = Vector3.zero;
-            sphereColor = Color.red;
+            totSeparation += neighbor.transform.position;
         }
+        totSeparation /= neighbors.Length;
 
-        transform.position += transform.forward * currentMovementSpeed * Time.deltaTime;
+        return totSeparation.normalized;
     }
-    private void OnDrawGizmos()
+    Vector3 Align()
     {
-        Gizmos.color = sphereColor;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Vector3 totAlign = Vector3.zero;
 
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawRay(transform.position, aiDirection * 10);
+        GameObject[] neighbors = GameObject.FindGameObjectsWithTag("Boid").Where(
+            n => n != gameObject && Vector3.Distance(n.transform.position, transform.position) <= separationRange).ToArray();
 
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawLine(transform.position, closestPoint);
+        if (neighbors.Length == 0f)
+            return totAlign;
+
+        foreach (GameObject neighbor in neighbors)
+        {
+            totAlign += neighbor.transform.forward;
+        }
+        totAlign /= neighbors.Length;
+
+        return totAlign;
     }
-    private void Cohesion()
-    {
-
-    }
-    private void Alignment()
-    {
-
-    }
-    private void Separation()
-    {
-
-    }
-
-    private float Remap(float min_A, float max_A, float min_B, float max_B, float A)
+    float Remap(float min_A, float max_A, float A, float min_B, float max_B)
     {
         float t = Mathf.InverseLerp(min_A, max_A, A);
         return Mathf.Lerp(min_B, max_B, t);
-    }
-    private Vector3 RemapSlerp(float min_A, float max_A, Vector3 min_B, Vector3 max_B, float A)
-    {
-        float t = Mathf.InverseLerp(min_A, max_A, A);
-        return Vector3.Slerp(min_B, max_B, t);
-    }
-    private Quaternion RemapSlerp(float min_A, float max_A, Quaternion min_B, Quaternion max_B, float A)
-    {
-        float t = Mathf.InverseLerp(min_A, max_A, A);
-        return Quaternion.Slerp(min_B, max_B, t);
-    }
-    private Vector3 RemapLerp(float min_A, float max_A, Vector3 min_B, Vector3 max_B, float A)
-    {
-        float t = Mathf.InverseLerp(min_A, max_A, A);
-        return Vector3.Lerp(min_B, max_B, t);
     }
 }
