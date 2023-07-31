@@ -24,9 +24,11 @@ public class CarController : MonoBehaviour
     [SerializeField]
     bool visualizer = true;
     [SerializeField]
-    AnimationCurve driftCurve;
-    [SerializeField]
     AnimationCurve speedCurve;
+    [SerializeField]
+    ParticleSystem particleSmoke;
+    [SerializeField]
+    float smokeActivationAngle = 50f;
 
     Vector3 movementVelocity;
     Vector3 driftVelocity;
@@ -48,8 +50,31 @@ public class CarController : MonoBehaviour
         Rotate();
         Move(movementVelocity);
         Visualizer(visualizer);
+
+        SmokeEffect();
     }
 
+    private void SmokeEffect()
+    {
+        float smokeAngle = Vector3.Angle(movementVelocity, transform.forward);
+        if (particleSmoke.isPlaying)
+        {
+            if (smokeAngle < smokeActivationAngle)
+                particleSmoke.Stop();
+            else
+            {
+                var emission = particleSmoke.emission;
+                var pMain = particleSmoke.main;
+                emission.rateOverTime = smokeAngle * 0.5f;
+                pMain.startSpeed = smokeAngle * 0.5f;
+            }
+        }
+        else
+        {
+            if (smokeAngle >= smokeActivationAngle)
+                particleSmoke.Play();
+        }
+    }
     private Vector3 Drift()
     {
         driftVelocity = Vector3.RotateTowards(
@@ -57,8 +82,6 @@ public class CarController : MonoBehaviour
             transform.forward * movementMagnitude, 
             sensibility * Time.deltaTime, 
             1f).normalized * driftMagnitude;
-
-        driftVelocity = driftVelocity * Remap(0f, 180f, Vector3.Angle(driftVelocity, transform.forward), 0f, 1f, driftCurve);
 
         return driftVelocity;
     }
@@ -80,9 +103,11 @@ public class CarController : MonoBehaviour
         Debug.DrawRay(transform.position, mouseDirection * debugLength, Color.cyan);
         Debug.DrawRay(transform.position, driftVelocity * debugLength, Color.yellow);
         Debug.DrawRay(transform.position, movementVelocity * debugLength, Color.magenta);
-        //Debug.DrawLine(transform.position + mouseDirection * debugLength, transform.position + transform.forward * movementMagnitude * debugLength, Color.white);
-        //Debug.DrawLine(transform.position + transform.forward * movementMagnitude * debugLength, transform.position + movementVelocity * debugLength, Color.white);
-        //Debug.DrawRay(Camera.main.transform.position, mouseRay.direction * 10, Color.red);
+        /*
+        Debug.DrawLine(transform.position + mouseDirection * debugLength, transform.position + transform.forward * movementMagnitude * debugLength, Color.white);
+        Debug.DrawLine(transform.position + transform.forward * movementMagnitude * debugLength, transform.position + movementVelocity * debugLength, Color.white);
+        Debug.DrawRay(Camera.main.transform.position, mouseRay.direction * 10, Color.red);
+        */
     }
     float Remap(float min_A, float max_A, float A, float min_B, float max_B, AnimationCurve curve)
     {
