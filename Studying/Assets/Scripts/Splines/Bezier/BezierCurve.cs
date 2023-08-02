@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BezierCurve : MonoBehaviour
 {
     public Vector3[] points;
-    private void Reset()
+    private void Reset() // called when by the editor when the component is created or reset
     {
         points = new Vector3[]
         {
