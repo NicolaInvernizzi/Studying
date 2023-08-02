@@ -78,5 +78,18 @@ public class GameManager : MonoBehaviour
             players[0].IncreaseScore();
         }
         matchInfo.text = text1 + text2;
+
+        int maxScore = players.Max(p => p.score);
+        Player currentWinner = players.First(p => p.score == maxScore);
+        Player[] losers = players.Where(p => p.score != maxScore).ToArray();
+        foreach(Player p in losers)
+        {
+            if (p.scoreBar.activeSelf)
+            {
+                p.scoreBar.SetActive(false);
+                break;
+            }
+        }
+        currentWinner.ChangeScoreBar(Mathf.Abs(players[0].score - players[1].score));
     }
 }

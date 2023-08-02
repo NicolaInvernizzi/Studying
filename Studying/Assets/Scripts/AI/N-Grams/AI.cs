@@ -22,7 +22,7 @@ public class AI : Player
     };
     Dictionary<string, int> aiStatus = new Dictionary<string, int>();
 
-    void Start() => NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Window)), true, false);
+    void Start() => NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Length - nGram_Window)), true, false);
     public void RandomMove()
     {
         SetMove(moveInfos.ElementAt(UnityEngine.Random.Range(0, moveInfos.Keys.Count)).Key);
@@ -33,7 +33,7 @@ public class AI : Player
 
         foreach (string key in aiStatus.Keys)
         {
-            if (FindPortionKey(key, string.Join("", opponentLastMoves.Skip(nGram_Window))))
+            if (FindPortionKey(key, string.Join("", opponentLastMoves.Skip(nGram_Length - nGram_Window))))
                 possibleKeysValues.Add(key, aiStatus[key]);
         }
 
@@ -45,7 +45,7 @@ public class AI : Player
                 if (possibleKeysValues[key] == possibleKeysValues.Values.Max())
                     highestKeys.Add(key);
             }
-            SetMove(moveInfos[char.ToString(highestKeys[UnityEngine.Random.Range(0, highestKeys.Count)][nGram_Length - nGram_Window])]);
+            SetMove(moveInfos[char.ToString(highestKeys[UnityEngine.Random.Range(0, highestKeys.Count)][nGram_Window])]);
         }
         else
             RandomMove();
@@ -114,7 +114,7 @@ public class AI : Player
         if (opponentLastMoves.Count < nGram_Length)
             text = $"Insufficient opponent last moves. The probabilies are:\n";
         else
-            text = $"With {string.Join("", opponentLastMoves.Skip(nGram_Window))} the probabilies are:\n";
+            text = $"With {string.Join("", opponentLastMoves.Skip(nGram_Length - nGram_Window))} the probabilies are:\n";
     
         foreach (string key in toPrint.Keys)
         {
@@ -146,7 +146,7 @@ public class AI : Player
             }
             foreach (string key in foundedKeys)
                 probabilities[moveInfos[probabilities.Keys.ToList().
-                    Find(k => k == char.ToString(key[nGram_Length - nGram_Window]))]] = aiStatus[key];
+                    Find(k => k == char.ToString(key[nGram_Window]))]] = aiStatus[key];
             foreach (string key in probKeys)
                 probValues.Add(Mathf.Floor((probabilities[key] / probabilities.Values.Sum()) * 100));
             int c = 0;
@@ -174,7 +174,7 @@ public class AI : Player
         PrintQueue(opponentLastMoves);
         PrintDictionary();
 
-        NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Window)), true, false);
+        NewProbability(string.Join("", opponentLastMoves.Skip(nGram_Length - nGram_Window)), true, false);
     }
     public IEnumerator Playing()
     {
