@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1009657741238617150}
   - component: {fileID: 7540331756986796518}
   - component: {fileID: 4714244803767603467}
+  - component: {fileID: -8501643831724796201}
   m_Layer: 0
   m_Name: Apple_Growing
   m_TagString: Untagged
@@ -83,3 +84,16 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!135 &-8501643831724796201
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6723522599385177933}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}

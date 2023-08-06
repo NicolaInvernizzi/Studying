@@ -14,5 +14,5 @@ public class FruitChewedState : FruitBaseState
             Object.Destroy(fruitContext.gameObject);
         }
     }
-    public override void OnCollisionEnter(FruitStateManager fruitContext, Collision collision) { }
+    public override void CollisionEnter(FruitStateManager fruitContext) { }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 public class Tree : MonoBehaviour
 {
     [SerializeField]
-    float spawnTime = 10f;
+    float spawnTime = 1f;
     [SerializeField]
     FruitStateManager fruit;
 

@@ -5,6 +5,8 @@ using UnityEngine;
 public class FruitStateManager : MonoBehaviour
 {
     [SerializeField]
+    float detectionRange = 0.5f;
+    [SerializeField]
     List<StatePrefabKeyValue> statePrefab = new List<StatePrefabKeyValue>();
     FruitBaseState currentState;
     FruitGrowingState growingState = new FruitGrowingState();
@@ -13,6 +15,7 @@ public class FruitStateManager : MonoBehaviour
     FruitChewedState chewedState = new FruitChewedState();
     Dictionary<States, FruitBaseState> states = new Dictionary<States, FruitBaseState>();
     [HideInInspector] public GameObject currentPrefabState = null;
+    public GameObject player { get; private set; }
 
     public enum States
     {
@@ -39,16 +42,15 @@ public class FruitStateManager : MonoBehaviour
     }
     private void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         SwitchState(States.Growing, PrefabStates.Growing);
     }
     private void Update()
     {
         currentState.UpdateState(this);
+        currentState.CollisionEnter(this);
     }
-    private void OnCollisionEnter(Collision collision)
-    {
-        currentState.OnCollisionEnter(this, collision);
-    }
+
     public void SwitchState(States state, PrefabStates prefabState = PrefabStates.None)
     {
         if (prefabState != PrefabStates.None)
@@ -69,6 +71,10 @@ public class FruitStateManager : MonoBehaviour
 
         currentState = states[state];
         currentState.EnterState(this);
+    }
+    public bool CollisionDetection()
+    {
+        return (player.transform.position - transform.position).magnitude <= detectionRange;
     }
 
     [Serializable]

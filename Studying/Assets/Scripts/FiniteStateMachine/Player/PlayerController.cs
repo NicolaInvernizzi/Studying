@@ -1,18 +1,24 @@
+using System.Linq;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     float health = 1f;
-    public void AddHealth()
+
+    public void HealthModifier(float quantity, bool increase)
     {
-        health++;
-    }
-    public void DecreaseHealth()
-    {
-        health--;
+        if (increase)
+            health += quantity;
+        else 
+            health -= quantity;
     }
 
     private void Update()
+    {
+        Move();
+    }
+
+    private void Move()
     {
         transform.position += (transform.forward * Input.GetAxis("Vertical") + 
             transform.right * Input.GetAxis("Horizontal")) * 2 * Time.deltaTime;

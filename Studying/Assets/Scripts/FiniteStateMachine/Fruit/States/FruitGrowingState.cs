@@ -15,11 +15,9 @@ public class FruitGrowingState : FruitBaseState
         if (fruitContext.currentPrefabState.transform.localScale.x < stopSize.x)
         {
             fruitContext.currentPrefabState.transform.localScale += growScaler * Time.deltaTime;
+            return;
         }
-        else
-        {
-            fruitContext.SwitchState(FruitStateManager.States.Whole);
-        }
+        fruitContext.SwitchState(FruitStateManager.States.Whole);
     }
-    public override void OnCollisionEnter(FruitStateManager fruitContext, Collision collision) { }
+    public override void CollisionEnter(FruitStateManager fruitContext) { }
 }

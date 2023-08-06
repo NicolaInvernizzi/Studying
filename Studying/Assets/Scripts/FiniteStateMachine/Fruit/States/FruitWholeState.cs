@@ -2,11 +2,13 @@ using UnityEngine;
 
 public class FruitWholeState : FruitBaseState
 {
-    float rottenTime = 50f;
+    float rottenTime = 10f;
 
     public override void EnterState(FruitStateManager fruitContext)
     {
-        fruitContext.GetComponent<Rigidbody>().useGravity = true;
+        Rigidbody rb = fruitContext.gameObject.AddComponent<Rigidbody>();
+        rb.drag = 2f;
+        rb.angularDrag = 2f;
         fruitContext.transform.SetParent(null);
     }
     public override void UpdateState(FruitStateManager fruitContext)
@@ -17,13 +19,11 @@ public class FruitWholeState : FruitBaseState
             fruitContext.SwitchState(FruitStateManager.States.Rotten, FruitStateManager.PrefabStates.Rotten);
         }
     }
-    public override void OnCollisionEnter(FruitStateManager fruitContext, Collision collision)
+    public override void CollisionEnter(FruitStateManager fruitContext) 
     {
-        GameObject other = collision.gameObject;
-        Debug.Log(other.name);
-        if (other.CompareTag("Player"))
+        if (fruitContext.CollisionDetection())
         {
-            other.GetComponent<PlayerController>().AddHealth();
+            fruitContext.player.GetComponent<PlayerController>().HealthModifier(1f, true);
             fruitContext.SwitchState(FruitStateManager.States.Chewed, FruitStateManager.PrefabStates.WholeChewed);
         }
     }
